@@ -65,7 +65,8 @@ namespace FIX
 		m_messageStoreFactory(messageStoreFactory),
 		m_pLogFactory(pLogFactory),
 		m_pResponder(0),
-		m_noDataFields(false)
+		m_noDataFields(false),
+		m_validateDictionary(true)
 	{
 		m_state.heartBtInt(heartBtInt);
 		m_state.initiate(heartBtInt != 0);
@@ -1033,8 +1034,7 @@ namespace FIX
 		reject.setField(Text(text));
 	}
 
-	bool Session::verify(const Message& msg, bool checkTooHigh,
-		bool checkTooLow)
+	bool Session::verify(const Message& msg, bool checkTooHigh, bool checkTooLow)
 	{
 		const MsgType* pMsgType = 0;
 		const MsgSeqNum* pMsgSeqNum = 0;
@@ -1309,7 +1309,8 @@ namespace FIX
 		{
 			if (!checkSessionTime(timeStamp))
 			{
-				reset(); return;
+				reset();
+				return;
 			}
 
 			const MsgType& msgType = FIELD_GET_REF(header, MsgType);
@@ -1337,17 +1338,20 @@ namespace FIX
 			const DataDictionary& sessionDataDictionary =
 				m_dataDictionaryProvider.getSessionDataDictionary(m_sessionID.getBeginString());
 
-			if (m_sessionID.isFIXT() && message.isApp())
+			if (m_validateDictionary)
 			{
-				ApplVerID applVerID = m_targetDefaultApplVerID;
-				header.getFieldIfSet(applVerID);
-				const DataDictionary& applicationDataDictionary =
-					m_dataDictionaryProvider.getApplicationDataDictionary(applVerID);
-				DataDictionary::validate(message, &sessionDataDictionary, &applicationDataDictionary);
-			}
-			else
-			{
-				sessionDataDictionary.validate(message);
+				if (m_sessionID.isFIXT() && message.isApp())
+				{
+					ApplVerID applVerID = m_targetDefaultApplVerID;
+					header.getFieldIfSet(applVerID);
+					const DataDictionary& applicationDataDictionary =
+						m_dataDictionaryProvider.getApplicationDataDictionary(applVerID);
+					DataDictionary::validate(message, &sessionDataDictionary, &applicationDataDictionary);
+				}
+				else
+				{
+					sessionDataDictionary.validate(message);
+				}
 			}
 
 			if (msgType == MsgType_Logon)
@@ -1366,7 +1370,8 @@ namespace FIX
 				nextReject(message, timeStamp);
 			else
 			{
-				if (!verify(message)) return;
+				if (!verify(message))
+					return;
 				m_state.incrNextTargetMsgSeqNum();
 			}
 		}

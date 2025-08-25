@@ -70,6 +70,7 @@ namespace FIX
 	const char SOCKET_RECEIVE_BUFFER_SIZE[] = "SocketReceiveBufferSize";
 	const char RECONNECT_INTERVAL[] = "ReconnectInterval";
 	const char NO_DATA_FIELDS[] = "NoDataFields";
+	const char VALIDATE_DICTIONARY[] = "ValidateDictionary";
 	const char VALIDATE_LENGTH_AND_CHECKSUM[] = "ValidateLengthAndChecksum";
 	const char VALIDATE_FIELDS_OUT_OF_ORDER[] = "ValidateFieldsOutOfOrder";
 	const char VALIDATE_FIELDS_HAVE_VALUES[] = "ValidateFieldsHaveValues";

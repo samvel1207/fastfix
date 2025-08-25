@@ -309,6 +309,16 @@ namespace FIX
 			m_noDataFields = value;
 		}
 
+		bool getValidateDictionary()
+		{
+			return m_validateDictionary;
+		}
+		void setValidateDictionary(bool value)
+		{
+			m_validateDictionary = value;
+		}
+
+
 		void setResponder(Responder* pR)
 		{
 			if (!checkSessionTime(UtcTimeStamp()))
@@ -411,8 +421,7 @@ namespace FIX
 		void populateRejectReason(Message&, int field, const std::string&);
 		void populateRejectReason(Message&, const std::string&);
 
-		bool verify(const Message& msg,
-			bool checkTooHigh = true, bool checkTooLow = true);
+		bool verify(const Message& msg, bool checkTooHigh = true, bool checkTooLow = true);
 
 		bool set(int s, const Message& m);
 		bool get(int s, Message& m) const;
@@ -438,6 +447,7 @@ namespace FIX
 		bool m_persistMessages;
 		bool m_validateLengthAndChecksum;
 		bool m_noDataFields;
+		bool m_validateDictionary;
 
 		SessionState m_state;
 		DataDictionaryProvider m_dataDictionaryProvider;

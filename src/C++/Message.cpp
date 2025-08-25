@@ -346,7 +346,8 @@ namespace FIX
 		{
 			FieldBase field = extractField(string, pos, pSessionDataDictionary, pApplicationDataDictionary);
 			if (count < 3 && headerOrder[count++] != field.getTag())
-				if (doValidation) throw InvalidMessage("Header fields out of order");
+				if (doValidation)
+					throw InvalidMessage("Header fields out of order");
 
 			if (isHeaderField(field, pSessionDataDictionary))
 			{
@@ -411,7 +412,8 @@ namespace FIX
 		int group = field.getTag();
 		int delim;
 		const DataDictionary* pDD = 0;
-		if (!dataDictionary.getGroup(msg, group, delim, pDD)) return;
+		if (!dataDictionary.getGroup(msg, group, delim, pDD))
+			return;
 		SmartPtr<Group> pGroup;
 
 		while (pos < string.size())
@@ -549,7 +551,6 @@ namespace FIX
 	}
 
 	SessionID Message::getSessionID(const std::string& qualifier) const
-		throw(FieldNotFound)
 	{
 		BeginString beginString;
 		SenderCompID senderCompID;

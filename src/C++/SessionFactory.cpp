@@ -198,6 +198,8 @@ namespace FIX
 			pSession->setValidateLengthAndChecksum(settings.getBool(VALIDATE_LENGTH_AND_CHECKSUM));
 		if (settings.has(NO_DATA_FIELDS))
 			pSession->setNoDataFields(settings.getBool(NO_DATA_FIELDS));
+		if (settings.has(VALIDATE_DICTIONARY))
+			pSession->setValidateDictionary(settings.getBool(VALIDATE_DICTIONARY));
 
 		return pSession.release();
 	}

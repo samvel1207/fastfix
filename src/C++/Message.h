@@ -59,7 +59,7 @@ namespace FIX
 			FieldMap::replaceGroup(num, group.field(), group);
 		}
 
-		Group& getGroup(unsigned num, FIX::Group& group) const throw(FieldNotFound)
+		Group& getGroup(unsigned num, FIX::Group& group) const
 		{
 			group.clear();
 			return static_cast <Group&>
@@ -107,7 +107,7 @@ namespace FIX
 			FieldMap::replaceGroup(num, group.field(), group);
 		}
 
-		Group& getGroup(unsigned num, FIX::Group& group) const throw(FieldNotFound)
+		Group& getGroup(unsigned num, FIX::Group& group) const
 		{
 			group.clear();
 			return static_cast <Group&>
@@ -170,11 +170,12 @@ namespace FIX
 			const FIX::DataDictionary& applicationDataDictionary, bool validate = true, bool noDataFields = false);
 
 		/// Construct a message from a string using a data dictionary
-		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order, const std::string& string, const FIX::DataDictionary& dataDictionary,
-			bool validate = true, bool noDataFields = false);
+		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order, 
+			const std::string& string, const FIX::DataDictionary& dataDictionary, bool validate = true, bool noDataFields = false);
 
 		/// Construct a message from a string using a session and application data dictionary
-		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order, const std::string& string, const FIX::DataDictionary& sessionDataDictionary,
+		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order,
+			const std::string& string, const FIX::DataDictionary& sessionDataDictionary,
 			const FIX::DataDictionary& applicationDataDictionary, bool validate = true, bool noDataFields = false);
 
 		Message(const Message& copy);
@@ -194,11 +195,10 @@ namespace FIX
 			FieldMap::replaceGroup(num, group.field(), group);
 		}
 
-		Group& getGroup(unsigned num, FIX::Group& group) const throw(FieldNotFound)
+		Group& getGroup(unsigned num, FIX::Group& group) const
 		{
 			group.clear();
-			return static_cast <Group&>
-				(FieldMap::getGroup(num, group.field(), group));
+			return static_cast <Group&>(FieldMap::getGroup(num, group.field(), group));
 		}
 
 		void removeGroup(unsigned num, const FIX::Group& group)
@@ -229,7 +229,7 @@ namespace FIX
 
 			return m_header.isSetField(field);
 		}
-		virtual const std::string& getField(int field) const throw(FieldNotFound)
+		virtual const std::string& getField(int field) 
 		{
 			try
 			{
@@ -240,7 +240,6 @@ namespace FIX
 				return m_header.getField(field);
 			}
 		}
-
 
 	protected:
 		// Constructor for derived classes
@@ -301,13 +300,25 @@ namespace FIX
 		bool setStringHeader(const std::string& string);
 
 		/// Getter for the message header
-		const Header& getHeader() const { return m_header; }
+		const Header& getHeader() const
+		{
+			return m_header;
+		}
 		/// Mutable getter for the message header
-		Header& getHeader() { return m_header; }
+		Header& getHeader()
+		{
+			return m_header;
+		}
 		/// Getter for the message trailer
-		const Trailer& getTrailer() const { return m_trailer; }
+		const Trailer& getTrailer() const
+		{
+			return m_trailer;
+		}
 		/// Mutable getter for the message trailer
-		Trailer& getTrailer() { return m_trailer; }
+		Trailer& getTrailer()
+		{
+			return m_trailer;
+		}
 
 		bool hasValidStructure(int& tag) const
 		{
@@ -363,10 +374,9 @@ namespace FIX
 
 		static bool isAdminMsgType(const MsgType& msgType)
 		{
-			if (msgType.getValue().length() != 1) return false;
-			return strchr
-			("0A12345",
-				msgType.getValue().c_str()[0]) != 0;
+			if (msgType.getValue().length() != 1)
+				return false;
+			return strchr ("0A12345", msgType.getValue().c_str()[0]) != 0;
 		}
 
 		static ApplVerID toApplVerID(const BeginString& value)
@@ -425,8 +435,7 @@ namespace FIX
 			const DataDictionary* pD);
 
 		/// Returns the session ID of the intended recipient
-		SessionID getSessionID(const std::string& qualifier = "") const
-			throw(FieldNotFound);
+		SessionID getSessionID(const std::string& qualifier = "") const;
 		/// Sets the session ID of the intended recipient
 		void setSessionID(const SessionID& sessionID);
 
@@ -473,14 +482,15 @@ namespace FIX
 
 	/// Parse the type of a message from a string.
 	inline MsgType identifyType(const std::string& message)
-		throw(MessageParseError)
 	{
 		std::string::size_type pos = message.find("\001" "35=");
-		if (pos == std::string::npos) throw MessageParseError();
+		if (pos == std::string::npos)
+			throw MessageParseError();
 
 		std::string::size_type startValue = pos + 4;
 		std::string::size_type soh = message.find_first_of('\001', startValue);
-		if (soh == std::string::npos) throw MessageParseError();
+		if (soh == std::string::npos)
+			throw MessageParseError();
 
 		std::string value = message.substr(startValue, soh - startValue);
 		return MsgType(value);
