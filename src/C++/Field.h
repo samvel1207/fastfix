@@ -39,530 +39,647 @@
 
 namespace FIX
 {
-/**
- * Base representation of all Field classes.
- *
- * This base class is the lowest common denominator of all fields.  It
- * keeps all fields in its most generic string representation with its
- * integer tag.
- */
-class FieldBase
-{
+	/**
+	 * Base representation of all Field classes.
+	 *
+	 * This base class is the lowest common denominator of all fields.  It
+	 * keeps all fields in its most generic string representation with its
+	 * integer tag.
+	 */
+	class FieldBase
+	{
 
-  /// Class used to store field metrics like total length and checksum
-  class field_metrics
-  {
-  public:
+		/// Class used to store field metrics like total length and checksum
+		class field_metrics
+		{
+		public:
 
-    field_metrics( const size_t length, const int checksum )
-      : m_length( length )
-      , m_checksum( checksum )
-    {}
+			field_metrics(const size_t length, const int checksum)
+				: m_length(length)
+				, m_checksum(checksum)
+			{}
 
-    size_t getLength() const
-    { return m_length; }
+			size_t getLength() const
+			{
+				return m_length;
+			}
 
-    int getCheckSum() const
-    { return m_checksum; }
+			int getCheckSum() const
+			{
+				return m_checksum;
+			}
 
-    bool isValid() const
-    { return m_length > 0; }
+			bool isValid() const
+			{
+				return m_length > 0;
+			}
 
-  private:
+		private:
 
-    size_t m_length;
-    int m_checksum;
-  };
+			size_t m_length;
+			int m_checksum;
+		};
 
-  friend class Message;
+		friend class Message;
 
-  /// Constructor which also calculates field metrics
-  FieldBase( int tag, 
-             std::string::const_iterator valueStart, 
-             std::string::const_iterator valueEnd,
-             std::string::const_iterator tagStart, 
-             std::string::const_iterator tagEnd )
-    : m_tag( tag )
-    , m_string( valueStart, valueEnd )
-    , m_metrics( calculateMetrics( tagStart, tagEnd ) )
-  {}
+		/// Constructor which also calculates field metrics
+		FieldBase(int tag,
+			std::string::const_iterator valueStart,
+			std::string::const_iterator valueEnd,
+			std::string::const_iterator tagStart,
+			std::string::const_iterator tagEnd)
+			: m_tag(tag)
+			, m_string(valueStart, valueEnd)
+			, m_metrics(calculateMetrics(tagStart, tagEnd))
+		{}
 
-public:
-  FieldBase( int tag, const std::string& string )
-    : m_tag( tag ), m_string(string), m_metrics( no_metrics() )
-  {}
+	public:
+		FieldBase(int tag, const std::string& string)
+			: m_tag(tag), m_string(string), m_metrics(no_metrics())
+		{}
 
-  virtual ~FieldBase() {}
+		virtual ~FieldBase() {}
 
-  FieldBase( const FieldBase& rhs )
-  : m_tag( rhs.getTag() )
-  , m_string( rhs.m_string )
-  , m_metrics( rhs.m_metrics )
-  {
+		FieldBase(const FieldBase& rhs)
+			: m_tag(rhs.getTag())
+			, m_string(rhs.m_string)
+			, m_metrics(rhs.m_metrics)
+		{
 
-  }
+		}
 
-  FieldBase& operator=( const FieldBase& rhs)
-  {
-    m_tag = rhs.getTag();
-    m_string = rhs.m_string;
-    m_metrics = rhs.m_metrics;
-    m_data.clear();
+		FieldBase& operator=(const FieldBase& rhs)
+		{
+			m_tag = rhs.getTag();
+			m_string = rhs.m_string;
+			m_metrics = rhs.m_metrics;
+			m_data.clear();
 
-    return *this;
-  }
+			return *this;
+		}
 
-  void swap( FieldBase& rhs )
-  {
-    std::swap( m_tag, rhs.m_tag );
-    std::swap( m_metrics, rhs.m_metrics );
-    m_string.swap( rhs.m_string );
-    m_data.swap( rhs.m_data );
-  }
+		void swap(FieldBase& rhs)
+		{
+			std::swap(m_tag, rhs.m_tag);
+			std::swap(m_metrics, rhs.m_metrics);
+			m_string.swap(rhs.m_string);
+			m_data.swap(rhs.m_data);
+		}
 
-  void setTag( int tag )
-  {
-    m_tag = tag;
-    m_metrics = no_metrics();
-    m_data.clear();
-  }
+		void setTag(int tag)
+		{
+			m_tag = tag;
+			m_metrics = no_metrics();
+			m_data.clear();
+		}
 
-  /// @deprecated Use setTag
-  void setField( int field )
-  {
-    setTag( field );
-  }
+		/// @deprecated Use setTag
+		void setField(int field)
+		{
+			setTag(field);
+		}
 
-  void setString( const std::string& string )
-  {
-    m_string = string;
-    m_metrics = no_metrics();
-    m_data.clear();
-  }
+		void setString(const std::string& string)
+		{
+			m_string = string;
+			m_metrics = no_metrics();
+			m_data.clear();
+		}
 
-  /// Get the fields integer tag.
-  int getTag() const
-  { return m_tag; }
+		/// Get the fields integer tag.
+		int getTag() const
+		{
+			return m_tag;
+		}
 
-  /// @deprecated Use getTag
-  int getField() const
-  { return getTag(); }
+		/// @deprecated Use getTag
+		int getField() const
+		{
+			return getTag();
+		}
 
-  /// Get the string representation of the fields value.
-  const std::string& getString() const
-  { return m_string; }
+		/// Get the string representation of the fields value.
+		const std::string& getString() const
+		{
+			return m_string;
+		}
 
-  /// Get the string representation of the Field (i.e.) 55=MSFT[SOH]
-  const std::string& getFixString() const
-  {
-    if( m_data.empty() )
-      encodeTo( m_data );
+		/// Get the string representation of the Field (i.e.) 55=MSFT[SOH]
+		const std::string& getFixString() const
+		{
+			if (m_data.empty())
+				encodeTo(m_data);
 
-    return m_data;
-  }
+			return m_data;
+		}
 
-  /// Get the length of the fields string representation
-  size_t getLength() const
-  {
-    calculate();
-    return m_metrics.getLength();
-  }
+		/// Get the length of the fields string representation
+		size_t getLength() const
+		{
+			calculate();
+			return m_metrics.getLength();
+		}
 
-  /// Get the total value the fields characters added together
-  int getTotal() const
-  {
-    calculate();
-    return m_metrics.getCheckSum();
-  }
+		/// Get the total value the fields characters added together
+		int getTotal() const
+		{
+			calculate();
+			return m_metrics.getCheckSum();
+		}
 
-  /// Compares fields based on their tag numbers
-  bool operator < ( const FieldBase& field ) const
-  { return m_tag < field.m_tag; }
+		/// Compares fields based on their tag numbers
+		bool operator < (const FieldBase& field) const
+		{
+			return m_tag < field.m_tag;
+		}
 
-private:
+	private:
 
-  void calculate() const
-  {
-    if( m_metrics.isValid() ) return;
+		void calculate() const
+		{
+			if (m_metrics.isValid()) return;
 
-    m_metrics = calculateMetrics( getFixString() );
-  }
+			m_metrics = calculateMetrics(getFixString());
+		}
 
-  /// Serializes string representation of the Field to input string
-  void encodeTo( std::string& result ) const
-  {
-    size_t tagLength = FIX::number_of_symbols_in( m_tag );
-    size_t totalLength = tagLength + m_string.length() + 2;
+		/// Serializes string representation of the Field to input string
+		void encodeTo(std::string& result) const
+		{
+			size_t tagLength = FIX::number_of_symbols_in(m_tag);
+			size_t totalLength = tagLength + m_string.length() + 2;
 
-    result.resize( totalLength );
+			result.resize(totalLength);
 
-    char * buf = (char*)result.c_str();
-    FIX::integer_to_string( buf, tagLength, m_tag );
+			char* buf = (char*)result.c_str();
+			FIX::integer_to_string(buf, tagLength, m_tag);
 
-    buf[tagLength] = '=';
-    memcpy( buf + tagLength + 1, m_string.data(), m_string.length() );
-    buf[totalLength - 1] = '\001';
-  }
+			buf[tagLength] = '=';
+			memcpy(buf + tagLength + 1, m_string.data(), m_string.length());
+			buf[totalLength - 1] = '\001';
+		}
 
-  static field_metrics no_metrics()
-  {
-    return field_metrics( 0, 0 );
-  }
+		static field_metrics no_metrics()
+		{
+			return field_metrics(0, 0);
+		}
 
-  /// Calculate metrics for any input string
-  static field_metrics calculateMetrics( 
-    std::string::const_iterator const start,
-    std::string::const_iterator const end )
-  {
-    int checksum = 0;
-    for ( std::string::const_iterator str = start; str != end; ++str )
-      checksum += (unsigned char)( *str );
+		/// Calculate metrics for any input string
+		static field_metrics calculateMetrics(
+			std::string::const_iterator const start,
+			std::string::const_iterator const end)
+		{
+			int checksum = 0;
+			for (std::string::const_iterator str = start; str != end; ++str)
+				checksum += (unsigned char)(*str);
 
 #if defined(__SUNPRO_CC)
-    std::ptrdiff_t d;
-    std::distance(start, end, d);
-    return field_metrics( d, checksum );
+			std::ptrdiff_t d;
+			std::distance(start, end, d);
+			return field_metrics(d, checksum);
 #else
-    return field_metrics( std::distance( start, end ), checksum );
+			return field_metrics(std::distance(start, end), checksum);
 #endif
-  }
+		}
 
-  static field_metrics calculateMetrics( const std::string& field )
-  {
-    return calculateMetrics( field.begin(), field.end() );
-  }
+		static field_metrics calculateMetrics(const std::string& field)
+		{
+			return calculateMetrics(field.begin(), field.end());
+		}
 
-  int m_tag;
-  std::string m_string;
-  mutable std::string m_data;
-  mutable field_metrics m_metrics;
-};
-/*! @} */
+		int m_tag;
+		std::string m_string;
+		mutable std::string m_data;
+		mutable field_metrics m_metrics;
+	};
+	/*! @} */
 
-inline std::ostream& operator <<
-( std::ostream& stream, const FieldBase& field )
-{
-  stream << field.getString();
-  return stream;
-}
+	inline std::ostream& operator <<
+		(std::ostream& stream, const FieldBase& field)
+	{
+		stream << field.getString();
+		return stream;
+	}
 
-inline void swap( FieldBase& lhs, FieldBase& rhs )
-{
-  lhs.swap( rhs );
-}
+	inline void swap(FieldBase& lhs, FieldBase& rhs)
+	{
+		lhs.swap(rhs);
+	}
 
-/**
- * MSC doesn't support partial template specialization so we have this.
- * this is here to provide equality checking against native char arrays.
- */
-class StringField : public FieldBase
-{
-public:
-  explicit StringField( int field, const std::string& data )
-: FieldBase( field, data ) {}
-  StringField( int field )
-: FieldBase( field, "" ) {}
+	/**
+	 * MSC doesn't support partial template specialization so we have this.
+	 * this is here to provide equality checking against native char arrays.
+	 */
+	class StringField : public FieldBase
+	{
+	public:
+		explicit StringField(int field, const std::string& data)
+			: FieldBase(field, data) {}
+		StringField(int field)
+			: FieldBase(field, "") {}
 
-  void setValue( const std::string& value )
-    { setString( value ); }
-  const std::string& getValue() const
-    { return getString(); }
-  operator const std::string&() const
-    { return getString(); }
+		void setValue(const std::string& value)
+		{
+			setString(value);
+		}
+		const std::string& getValue() const
+		{
+			return getString();
+		}
+		operator const std::string& () const
+		{
+			return getString();
+		}
 
-  bool operator<( const StringField& rhs ) const
-    { return getString() < rhs.getString(); }
-  bool operator>( const StringField& rhs ) const
-    { return getString() > rhs.getString(); }
-  bool operator==( const StringField& rhs ) const
-    { return getString() == rhs.getString(); }
-  bool operator!=( const StringField& rhs ) const
-    { return getString() != rhs.getString(); }
-  bool operator<=( const StringField& rhs ) const
-    { return getString() <= rhs.getString(); }
-  bool operator>=( const StringField& rhs ) const
-    { return getString() >= rhs.getString(); }
-  friend bool operator<( const StringField&, const char* );
-  friend bool operator<( const char*, const StringField& );
-  friend bool operator>( const StringField&, const char* );
-  friend bool operator>( const char*, const StringField& );
-  friend bool operator==( const StringField&, const char* );
-  friend bool operator==( const char*, const StringField& );
-  friend bool operator!=( const StringField&, const char* );
-  friend bool operator!=( const char*, const StringField& );
-  friend bool operator<=( const StringField&, const char* );
-  friend bool operator<=( const char*, const StringField& );
-  friend bool operator>=( const StringField&, const char* );
-  friend bool operator>=( const char*, const StringField& );
+		bool operator<(const StringField& rhs) const
+		{
+			return getString() < rhs.getString();
+		}
+		bool operator>(const StringField& rhs) const
+		{
+			return getString() > rhs.getString();
+		}
+		bool operator==(const StringField& rhs) const
+		{
+			return getString() == rhs.getString();
+		}
+		bool operator!=(const StringField& rhs) const
+		{
+			return getString() != rhs.getString();
+		}
+		bool operator<=(const StringField& rhs) const
+		{
+			return getString() <= rhs.getString();
+		}
+		bool operator>=(const StringField& rhs) const
+		{
+			return getString() >= rhs.getString();
+		}
 
-  friend bool operator<( const StringField&, const std::string& );
-  friend bool operator<( const std::string&, const StringField& );
-  friend bool operator>( const StringField&, const std::string& );
-  friend bool operator>( const std::string&, const StringField& );
-  friend bool operator==( const StringField&, const std::string& );
-  friend bool operator==( const std::string&, const StringField& );
-  friend bool operator!=( const StringField&, const std::string& );
-  friend bool operator!=( const std::string&, const StringField& );
-  friend bool operator<=( const StringField&, const std::string& );
-  friend bool operator<=( const std::string&, const StringField& );
-  friend bool operator>=( const StringField&, const std::string& );
-  friend bool operator>=( const std::string&, const StringField& );
-};
+		friend bool operator<(const StringField&, const std::string&);
+		friend bool operator<(const std::string&, const StringField&);
+		friend bool operator>(const StringField&, const std::string&);
+		friend bool operator>(const std::string&, const StringField&);
+		friend bool operator==(const StringField&, const std::string&);
+		friend bool operator==(const std::string&, const StringField&);
+		friend bool operator!=(const StringField&, const std::string&);
+		friend bool operator!=(const std::string&, const StringField&);
+		friend bool operator<=(const StringField&, const std::string&);
+		friend bool operator<=(const std::string&, const StringField&);
+		friend bool operator>=(const StringField&, const std::string&);
+		friend bool operator>=(const std::string&, const StringField&);
+	};
 
-inline bool operator<( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() < rhs; }
-inline bool operator<( const char* lhs, const StringField& rhs )
-  { return lhs < rhs.getValue(); }
-inline bool operator>( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() > rhs; }
-inline bool operator>( const char* lhs, const StringField& rhs )
-  { return lhs > rhs.getValue(); }
-inline bool operator==( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() == rhs; }
-inline bool operator==( const char* lhs, const StringField& rhs )
-  { return lhs == rhs.getValue(); }
-inline bool operator!=( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() != rhs; }
-inline bool operator!=( const char* lhs, const StringField& rhs )
-  { return lhs != rhs.getValue(); }
-inline bool operator<=( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() <= rhs; }
-inline bool operator<=( const char* lhs, const StringField& rhs )
-  { return lhs <= rhs.getValue(); }
-inline bool operator>=( const StringField& lhs, const char* rhs )
-  { return lhs.getValue() >= rhs; }
-inline bool operator>=( const char* lhs, const StringField& rhs )
-  { return lhs >= rhs.getValue(); }
+	inline bool operator<(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() < rhs;
+	}
+	inline bool operator<(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs < rhs.getValue();
+	}
+	inline bool operator>(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() > rhs;
+	}
+	inline bool operator>(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs > rhs.getValue();
+	}
+	inline bool operator==(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() == rhs;
+	}
+	inline bool operator==(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs == rhs.getValue();
+	}
+	inline bool operator!=(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() != rhs;
+	}
+	inline bool operator!=(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs != rhs.getValue();
+	}
+	inline bool operator<=(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() <= rhs;
+	}
+	inline bool operator<=(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs <= rhs.getValue();
+	}
+	inline bool operator>=(const StringField& lhs, const std::string& rhs)
+	{
+		return lhs.getValue() >= rhs;
+	}
+	inline bool operator>=(const std::string& lhs, const StringField& rhs)
+	{
+		return lhs >= rhs.getValue();
+	}
 
-inline bool operator<( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() < rhs; }
-inline bool operator<( const std::string& lhs, const StringField& rhs )
-  { return lhs < rhs.getValue(); }
-inline bool operator>( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() > rhs; }
-inline bool operator>( const std::string& lhs, const StringField& rhs )
-  { return lhs > rhs.getValue(); }
-inline bool operator==( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() == rhs; }
-inline bool operator==( const std::string& lhs, const StringField& rhs )
-  { return lhs == rhs.getValue(); }
-inline bool operator!=( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() != rhs; }
-inline bool operator!=( const std::string& lhs, const StringField& rhs )
-  { return lhs != rhs.getValue(); }
-inline bool operator<=( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() <= rhs; }
-inline bool operator<=( const std::string& lhs, const StringField& rhs )
-  { return lhs <= rhs.getValue(); }
-inline bool operator>=( const StringField& lhs, const std::string& rhs )
-  { return lhs.getValue() >= rhs; }
-inline bool operator>=( const std::string& lhs, const StringField& rhs )
-  { return lhs >= rhs.getValue(); }
+	/// Field that contains a character value
+	class CharField : public FieldBase
+	{
+	public:
+		explicit CharField(int field, char data)
+			: FieldBase(field, CharConvertor::convert(data)) {}
+		CharField(int field)
+			: FieldBase(field, "") {}
 
-/// Field that contains a character value
-class CharField : public FieldBase
-{
-public:
-  explicit CharField( int field, char data )
-: FieldBase( field, CharConvertor::convert( data ) ) {}
-  CharField( int field )
-: FieldBase( field, "" ) {}
+		void setValue(char value)
+		{
+			setString(CharConvertor::convert(value));
+		}
+		char getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return CharConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator char() const
+		{
+			return getValue();
+		}
+	};
 
-  void setValue( char value )
-    { setString( CharConvertor::convert( value ) ); }
-  char getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return CharConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator char() const
-    { return getValue(); }
-};
+	/// Field that contains a double value
+	class DoubleField : public FieldBase
+	{
+	public:
+		explicit DoubleField(int field, double data, int padding = 0)
+			: FieldBase(field, DoubleConvertor::convert(data, padding)) {}
+		DoubleField(int field)
+			: FieldBase(field, "") {}
 
-/// Field that contains a double value
-class DoubleField : public FieldBase
-{
-public:
-  explicit DoubleField( int field, double data, int padding = 0 )
-: FieldBase( field, DoubleConvertor::convert( data, padding ) ) {}
-  DoubleField( int field )
-: FieldBase( field, "" ) {}
+		void setValue(double value, int padding = 0)
+		{
+			setString(DoubleConvertor::convert(value, padding));
+		}
+		double getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return DoubleConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator double() const
+		{
+			return getValue();
+		}
+	};
 
-  void setValue( double value, int padding = 0 )
-    { setString( DoubleConvertor::convert( value, padding ) ); }
-  double getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return DoubleConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator double() const
-    { return getValue(); }
-};
+	/// Field that contains an integer value
+	class IntField : public FieldBase
+	{
+	public:
+		explicit IntField(int field, int data)
+			: FieldBase(field, IntConvertor::convert(data)) {}
+		IntField(int field)
+			: FieldBase(field, "") {}
 
-/// Field that contains an integer value
-class IntField : public FieldBase
-{
-public:
-  explicit IntField( int field, int data )
-: FieldBase( field, IntConvertor::convert( data ) ) {}
-  IntField( int field )
-: FieldBase( field, "" ) {}
+		void setValue(int value)
+		{
+			setString(IntConvertor::convert(value));
+		}
+		int getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return IntConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator const int() const
+		{
+			return getValue();
+		}
+	};
 
-  void setValue( int value )
-    { setString( IntConvertor::convert( value ) ); }
-  int getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return IntConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator const int() const
-    { return getValue(); }
-};
+	/// Field that contains a boolean value
+	class BoolField : public FieldBase
+	{
+	public:
+		explicit BoolField(int field, bool data)
+			: FieldBase(field, BoolConvertor::convert(data)) {}
+		BoolField(int field)
+			: FieldBase(field, "") {}
 
-/// Field that contains a boolean value
-class BoolField : public FieldBase
-{
-public:
-  explicit BoolField( int field, bool data )
-: FieldBase( field, BoolConvertor::convert( data ) ) {}
-  BoolField( int field )
-: FieldBase( field, "" ) {}
+		void setValue(bool value)
+		{
+			setString(BoolConvertor::convert(value));
+		}
+		bool getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return BoolConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator bool() const
+		{
+			return getValue();
+		}
+	};
 
-  void setValue( bool value )
-    { setString( BoolConvertor::convert( value ) ); }
-  bool getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return BoolConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator bool() const
-    { return getValue(); }
-};
+	/// Field that contains a UTC time stamp value
+	class UtcTimeStampField : public FieldBase
+	{
+	public:
+		explicit UtcTimeStampField(int field, const UtcTimeStamp& data, int precision = 0)
+			: FieldBase(field, UtcTimeStampConvertor::convert(data, precision)) {}
+		UtcTimeStampField(int field, int precision = 0)
+			: FieldBase(field, UtcTimeStampConvertor::convert(UtcTimeStamp(), precision)) {}
 
-/// Field that contains a UTC time stamp value
-class UtcTimeStampField : public FieldBase
-{
-public:
-  explicit UtcTimeStampField( int field, const UtcTimeStamp& data, int precision = 0 )
-: FieldBase( field, UtcTimeStampConvertor::convert( data, precision ) ) {}
-  UtcTimeStampField( int field, int precision = 0 )
-: FieldBase( field, UtcTimeStampConvertor::convert( UtcTimeStamp(), precision ) ) {}
+		void setValue(const UtcTimeStamp& value)
+		{
+			setString(UtcTimeStampConvertor::convert(value));
+		}
+		UtcTimeStamp getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return UtcTimeStampConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator UtcTimeStamp() const
+		{
+			return getValue();
+		}
 
-  void setValue( const UtcTimeStamp& value )
-    { setString( UtcTimeStampConvertor::convert( value ) ); }
-  UtcTimeStamp getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return UtcTimeStampConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator UtcTimeStamp() const
-    { return getValue(); }
+		bool operator<(const UtcTimeStampField& rhs) const
+		{
+			return getValue() < rhs.getValue();
+		}
+		bool operator==(const UtcTimeStampField& rhs) const
+		{
+			return getValue() == rhs.getValue();
+		}
+		bool operator!=(const UtcTimeStampField& rhs) const
+		{
+			return getValue() != rhs.getValue();
+		}
+	};
 
-  bool operator<( const UtcTimeStampField& rhs ) const
-    { return getValue() < rhs.getValue(); }
-  bool operator==( const UtcTimeStampField& rhs ) const
-    { return getValue() == rhs.getValue(); }
-  bool operator!=( const UtcTimeStampField& rhs ) const
-    { return getValue() != rhs.getValue(); }
-};
+	/// Field that contains a UTC date value
+	class UtcDateField : public FieldBase
+	{
+	public:
+		explicit UtcDateField(int field, const UtcDate& data)
+			: FieldBase(field, UtcDateConvertor::convert(data)) {}
+		UtcDateField(int field)
+			: FieldBase(field, UtcDateConvertor::convert(UtcDate())) {}
 
-/// Field that contains a UTC date value
-class UtcDateField : public FieldBase
-{
-public:
-  explicit UtcDateField( int field, const UtcDate& data )
-: FieldBase( field, UtcDateConvertor::convert( data ) ) {}
-  UtcDateField( int field )
-: FieldBase( field, UtcDateConvertor::convert( UtcDate() ) ) {}
+		void setValue(const UtcDate& value)
+		{
+			setString(UtcDateConvertor::convert(value));
+		}
+		UtcDate getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return UtcDateConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator UtcDate() const
+		{
+			return getValue();
+		}
 
-  void setValue( const UtcDate& value )
-    { setString( UtcDateConvertor::convert( value ) ); }
-  UtcDate getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return UtcDateConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator UtcDate() const
-    { return getValue(); }
+		bool operator<(const UtcDateField& rhs) const
+		{
+			return getValue() < rhs.getValue();
+		}
+		bool operator==(const UtcDateField& rhs) const
+		{
+			return getValue() == rhs.getValue();
+		}
+		bool operator!=(const UtcDateField& rhs) const
+		{
+			return getValue() != rhs.getValue();
+		}
+	};
 
-  bool operator<( const UtcDateField& rhs ) const
-    { return getValue() < rhs.getValue(); }
-  bool operator==( const UtcDateField& rhs ) const
-    { return getValue() == rhs.getValue(); }
-  bool operator!=( const UtcDateField& rhs ) const
-    { return getValue() != rhs.getValue(); }
-};
+	/// Field that contains a UTC time value
+	class UtcTimeOnlyField : public FieldBase
+	{
+	public:
+		explicit UtcTimeOnlyField(int field, const UtcTimeOnly& data, int precision = 0)
+			: FieldBase(field, UtcTimeOnlyConvertor::convert(data, precision)) {}
+		UtcTimeOnlyField(int field, int precision = 0)
+			: FieldBase(field, UtcTimeOnlyConvertor::convert(UtcTimeOnly(), precision)) {}
 
-/// Field that contains a UTC time value
-class UtcTimeOnlyField : public FieldBase
-{
-public:
-  explicit UtcTimeOnlyField( int field, const UtcTimeOnly& data, int precision = 0 )
-: FieldBase( field, UtcTimeOnlyConvertor::convert( data, precision ) ) {}
-  UtcTimeOnlyField( int field, int precision = 0 )
-: FieldBase( field, UtcTimeOnlyConvertor::convert( UtcTimeOnly(), precision ) ) {}
+		void setValue(const UtcTimeOnly& value)
+		{
+			setString(UtcTimeOnlyConvertor::convert(value));
+		}
+		UtcTimeOnly getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return UtcTimeOnlyConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator UtcTimeOnly() const
+		{
+			return getValue();
+		}
 
-  void setValue( const UtcTimeOnly& value )
-    { setString( UtcTimeOnlyConvertor::convert( value ) ); }
-  UtcTimeOnly getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return UtcTimeOnlyConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator UtcTimeOnly() const
-    { return getValue(); }
+		bool operator<(const UtcTimeOnlyField& rhs) const
+		{
+			return getValue() < rhs.getValue();
+		}
+		bool operator==(const UtcTimeOnlyField& rhs) const
+		{
+			return getValue() == rhs.getValue();
+		}
+		bool operator!=(const UtcTimeOnlyField& rhs) const
+		{
+			return getValue() != rhs.getValue();
+		}
+	};
 
-  bool operator<( const UtcTimeOnlyField& rhs ) const
-    { return getValue() < rhs.getValue(); }
-  bool operator==( const UtcTimeOnlyField& rhs ) const
-    { return getValue() == rhs.getValue(); }
-  bool operator!=( const UtcTimeOnlyField& rhs ) const
-    { return getValue() != rhs.getValue(); }
-};
+	/// Field that contains a checksum value
+	class CheckSumField : public FieldBase
+	{
+	public:
+		explicit CheckSumField(int field, int data)
+			: FieldBase(field, CheckSumConvertor::convert(data)) {}
+		CheckSumField(int field)
+			: FieldBase(field, "") {}
 
-/// Field that contains a checksum value
-class CheckSumField : public FieldBase
-{
-public:
-  explicit CheckSumField( int field, int data )
-: FieldBase( field, CheckSumConvertor::convert( data ) ) {}
-  CheckSumField( int field )
-: FieldBase( field, "" ) {}
+		void setValue(int value)
+		{
+			setString(CheckSumConvertor::convert(value));
+		}
+		int getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return CheckSumConvertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator const int() const
+		{
+			return getValue();
+		}
+	};
 
-  void setValue( int value )
-    { setString( CheckSumConvertor::convert( value ) ); }
-  int getValue() const throw ( IncorrectDataFormat )
-    { try
-      { return CheckSumConvertor::convert( getString() ); }
-      catch( FieldConvertError& )
-      { throw IncorrectDataFormat( getTag(), getString() ); } }
-  operator const int() const
-    { return getValue(); }
-};
-
-typedef DoubleField PriceField;
-typedef DoubleField AmtField;
-typedef DoubleField QtyField;
-typedef StringField CurrencyField;
-typedef StringField MultipleValueStringField;
-typedef StringField MultipleStringValueField;
-typedef StringField MultipleCharValueField;
-typedef StringField ExchangeField;
-typedef StringField LocalMktDateField;
-typedef StringField DataField;
-typedef DoubleField FloatField;
-typedef DoubleField PriceOffsetField;
-typedef StringField MonthField;
-typedef StringField MonthYearField;
-typedef StringField DayOfMonthField;
-typedef UtcDateField UtcDateOnlyField;
-typedef IntField LengthField;
-typedef IntField NumInGroupField;
-typedef IntField SeqNumField;
-typedef DoubleField PercentageField;
-typedef StringField CountryField;
-typedef StringField TzTimeOnlyField;
-typedef StringField TzTimeStampField;
+	typedef DoubleField PriceField;
+	typedef DoubleField AmtField;
+	typedef DoubleField QtyField;
+	typedef StringField CurrencyField;
+	typedef StringField MultipleValueStringField;
+	typedef StringField MultipleStringValueField;
+	typedef StringField MultipleCharValueField;
+	typedef StringField ExchangeField;
+	typedef StringField LocalMktDateField;
+	typedef StringField DataField;
+	typedef DoubleField FloatField;
+	typedef DoubleField PriceOffsetField;
+	typedef StringField MonthField;
+	typedef StringField MonthYearField;
+	typedef StringField DayOfMonthField;
+	typedef UtcDateField UtcDateOnlyField;
+	typedef IntField LengthField;
+	typedef IntField NumInGroupField;
+	typedef IntField SeqNumField;
+	typedef DoubleField PercentageField;
+	typedef StringField CountryField;
+	typedef StringField TzTimeOnlyField;
+	typedef StringField TzTimeStampField;
 }
 
 #define DEFINE_FIELD_CLASS_NUM( NAME, TOK, TYPE, NUM ) \

@@ -726,22 +726,20 @@ namespace FIX
 		resendRequest.setField(beginSeqNo);
 		resendRequest.setField(endSeqNo);
 
-		// OMD_THIRD_PARTY_CHANGE: Set this in order to let our FixSubscriber class know the end of range (SideValueInd is choosen randomly, it'll get removed before sending the message to the server)
+		// OMD_THIRD_PARTY_CHANGE: Set this in order to let our FixSubscriber class know the end of range 
+		// (SideValueInd is choosen randomly, it'll get removed before sending the message to the server)
 		SideValueInd sideValue(msgSeqNum);
 		resendRequest.setField(sideValue);
 
 		fill(resendRequest.getHeader());
 		sendRaw(resendRequest);
 
-		m_state.onEvent("Sent ResendRequest FROM: "
-			+ IntConvertor::convert(beginSeqNo) +
-			" TO: " + IntConvertor::convert(endSeqNo));
+		m_state.onEvent("Sent ResendRequest FROM: " + IntConvertor::convert(beginSeqNo) + " TO: " + IntConvertor::convert(endSeqNo));
 
 		m_state.resendRange(beginSeqNo, msgSeqNum - 1);
 	}
 
-	void Session::generateSequenceReset
-	(int beginSeqNo, int endSeqNo)
+	void Session::generateSequenceReset(int beginSeqNo, int endSeqNo)
 	{
 		SmartPtr<Message> pMsg(newMessage("4"));
 		Message& sequenceReset = *pMsg;
@@ -758,8 +756,7 @@ namespace FIX
 		sequenceReset.getHeader().setField(MsgSeqNum(beginSeqNo));
 		sequenceReset.setField(GapFillFlag(true));
 		sendRaw(sequenceReset, beginSeqNo);
-		m_state.onEvent("Sent SequenceReset TO: "
-			+ IntConvertor::convert(newSeqNo));
+		m_state.onEvent("Sent SequenceReset TO: " + IntConvertor::convert(newSeqNo));
 	}
 
 	void Session::generateHeartbeat()
