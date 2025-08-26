@@ -84,10 +84,10 @@ namespace FIX
 
 		/// Constructor which also calculates field metrics
 		FieldBase(int tag,
-			std::string::const_iterator valueStart,
-			std::string::const_iterator valueEnd,
-			std::string::const_iterator tagStart,
-			std::string::const_iterator tagEnd)
+			const char* valueStart,
+			const char* valueEnd,
+			const char* tagStart,
+			const char* tagEnd)
 			: m_tag(tag)
 			, m_string(valueStart, valueEnd)
 			, m_metrics(calculateMetrics(tagStart, tagEnd))
@@ -225,25 +225,19 @@ namespace FIX
 
 		/// Calculate metrics for any input string
 		static field_metrics calculateMetrics(
-			std::string::const_iterator const start,
-			std::string::const_iterator const end)
+			const char* start,
+			const char* end)
 		{
 			int checksum = 0;
-			for (std::string::const_iterator str = start; str != end; ++str)
+			for (const char* str = start; str != end; ++str)
 				checksum += (unsigned char)(*str);
 
-#if defined(__SUNPRO_CC)
-			std::ptrdiff_t d;
-			std::distance(start, end, d);
-			return field_metrics(d, checksum);
-#else
-			return field_metrics(std::distance(start, end), checksum);
-#endif
+			return field_metrics(end - start, checksum);
 		}
 
 		static field_metrics calculateMetrics(const std::string& field)
 		{
-			return calculateMetrics(field.begin(), field.end());
+			return calculateMetrics(field.c_str(), field.c_str() + field.size());
 		}
 
 		int m_tag;

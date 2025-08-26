@@ -459,6 +459,19 @@ namespace FIX
 			return false;
 		}
 
+		inline int findChar(const char* start, int pos, int len, char c, const char*& targetPtr) const
+		{
+			for (int i = pos; i < len; ++i, ++start)
+			{
+				if (*start == c)
+				{
+					targetPtr = start;
+					return i;
+				}
+			}
+			return len;
+		}
+
 		void validate() const;
 		std::string toXMLFields(const FieldMap& fields, int space) const;
 

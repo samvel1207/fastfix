@@ -616,21 +616,24 @@ namespace FIX
 		const DataDictionary* pSessionDD /*= 0*/, const DataDictionary* pAppDD /*= 0*/,
 		const Group* pGroup /*= 0*/) const
 	{
-		std::string::const_iterator const tagStart = string.begin() + pos;
-		std::string::const_iterator const strEnd = string.end();
+		const char* tagStart = string.c_str() + pos;
+		int len = string.size();
 
-		std::string::const_iterator const equalSign = std::find(tagStart, strEnd, '=');
-		if (equalSign == strEnd)
+		const char* equalSign;
+		int newPos = findChar(tagStart, pos, len, '=', equalSign);
+		if (newPos == len)
 			throw InvalidMessage("Equal sign not found in field");
 
 		int field = 0;
 		if (!IntConvertor::convert(tagStart, equalSign, field))
 			throw InvalidMessage(std::string("Field tag is invalid: ") + std::string(tagStart, equalSign));
 
-		std::string::const_iterator const valueStart = equalSign + 1;
+		newPos++;
+		const char* valueStart = equalSign + 1;
 
-		std::string::const_iterator soh = std::find(valueStart, strEnd, '\001');
-		if (soh == strEnd)
+		const char* soh;
+		newPos = findChar(valueStart, newPos, len, '\001', soh);
+		if (newPos == len)
 			throw InvalidMessage("SOH not found at end of field");
 
 		if (!m_noDataFields && IsDataField(field, pSessionDD, pAppDD))
@@ -667,19 +670,9 @@ namespace FIX
 			}
 		}
 
-		std::string::const_iterator const tagEnd = soh + 1;
-#if defined(__SUNPRO_CC)
-		std::distance(string.begin(), tagEnd, pos);
-#else
-		pos = std::distance(string.begin(), tagEnd);
-#endif
+		const char* tagEnd = soh + 1;
+		pos = tagEnd - string.c_str();
 
-		return FieldBase(
-			field,
-			valueStart,
-			soh,
-			tagStart,
-			tagEnd);
+		return FieldBase(field, valueStart, soh, tagStart, tagEnd);
 	}
-
 }
