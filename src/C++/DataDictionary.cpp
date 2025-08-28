@@ -137,8 +137,7 @@ namespace FIX
 		}
 
 		int field = 0;
-		if ((pSessionDD != 0 && pSessionDD->m_checkFieldsOutOfOrder) ||
-			(pAppDD != 0 && pAppDD->m_checkFieldsOutOfOrder))
+		if ((pSessionDD != 0 && pSessionDD->m_checkFieldsOutOfOrder) || pAppDD != 0 && pAppDD->m_checkFieldsOutOfOrder)
 		{
 			if (!message.hasValidStructure(field))
 				throw TagOutOfOrder(field);
@@ -147,7 +146,7 @@ namespace FIX
 		if (pAppDD != 0 && pAppDD->m_hasVersion)
 		{
 			pAppDD->checkMsgType(msgType);
-			pAppDD->checkHasRequired(message.getHeader(), message, message.getTrailer(), msgType);
+			pAppDD->checkHasRequired(message.getHeader(), message, message.getTrailer(), msgType); // needed (no missing required fields)
 		}
 
 		if (pSessionDD != 0)
@@ -183,8 +182,7 @@ namespace FIX
 			if (m_beginString.getValue().length() && shouldCheckTag(field))
 			{
 				checkValidTagNumber(field);
-				if (!Message::isHeaderField(field, this)
-					&& !Message::isTrailerField(field, this))
+				if (!Message::isHeaderField(field, this) && !Message::isTrailerField(field, this))
 				{
 					checkIsInMessage(field, msgType);
 					checkGroupCount(field, map, msgType);

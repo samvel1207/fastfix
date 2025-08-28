@@ -1115,11 +1115,9 @@ namespace FIX
 
 	bool Session::validLogonState(const MsgType& msgType)
 	{
-		if ((msgType == MsgType_Logon && m_state.sentReset())
-			|| (m_state.receivedReset()))
+		if ((msgType == MsgType_Logon && m_state.sentReset()) || (m_state.receivedReset()))
 			return true;
-		if ((msgType == MsgType_Logon && !m_state.receivedLogon())
-			|| (msgType != MsgType_Logon && m_state.receivedLogon()))
+		if ((msgType == MsgType_Logon && !m_state.receivedLogon()) || (msgType != MsgType_Logon && m_state.receivedLogon()))
 			return true;
 		if (msgType == MsgType_Logout && m_state.sentLogon())
 			return true;

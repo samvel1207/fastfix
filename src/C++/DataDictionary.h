@@ -523,33 +523,25 @@ namespace FIX
 		}
 
 		/// Check if a field is in this message type.
-		void checkIsInMessage
-		(const FieldBase& field, const MsgType& msgType) const
-			throw(TagNotDefinedForMessage)
+		void checkIsInMessage(const FieldBase& field, const MsgType& msgType) const
 		{
 			if (!isMsgField(msgType, field.getTag()))
 				throw TagNotDefinedForMessage(field.getTag());
 		}
 
 		/// Check if group count matches number of groups in
-		void checkGroupCount
-		(const FieldBase& field, const FieldMap& fieldMap, const MsgType& msgType) const
-			throw(RepeatingGroupCountMismatch)
+		void checkGroupCount(const FieldBase& field, const FieldMap& fieldMap, const MsgType& msgType) const
 		{
 			int fieldNum = field.getTag();
 			if (isGroup(msgType, fieldNum))
 			{
-				if ((int)fieldMap.groupCount(fieldNum)
-					!= IntConvertor::convert(field.getString()))
+				if ((int)fieldMap.groupCount(fieldNum) != IntConvertor::convert(field.getString()))
 					throw RepeatingGroupCountMismatch(fieldNum);
 			}
 		}
 
 		/// Check if a message has all required fields.
-		void checkHasRequired
-		(const FieldMap& header, const FieldMap& body, const FieldMap& trailer,
-			const MsgType& msgType) const
-			throw(RequiredTagMissing)
+		void checkHasRequired(const FieldMap& header, const FieldMap& body, const FieldMap& trailer, const MsgType& msgType) const
 		{
 			NonBodyFields::const_iterator iNBF;
 			for (iNBF = m_headerFields.begin(); iNBF != m_headerFields.end(); ++iNBF)
@@ -564,9 +556,9 @@ namespace FIX
 					throw RequiredTagMissing(iNBF->first);
 			}
 
-			MsgTypeToField::const_iterator iM
-				= m_requiredFields.find(msgType.getString());
-			if (iM == m_requiredFields.end()) return;
+			MsgTypeToField::const_iterator iM = m_requiredFields.find(msgType.getString());
+			if (iM == m_requiredFields.end())
+				return;
 
 			const MsgFields& fields = iM->second;
 			MsgFields::const_iterator iF;

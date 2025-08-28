@@ -102,9 +102,12 @@ namespace FIX
 	void FieldMap::replaceGroup(int num, int field, const FieldMap& group)
 	{
 		Groups::const_iterator i = m_groups.find(field);
-		if (i == m_groups.end()) return;
-		if (num <= 0) return;
-		if (i->second.size() < (unsigned)num) return;
+		if (i == m_groups.end())
+			return;
+		if (num <= 0)
+			return;
+		if (i->second.size() < (unsigned)num)
+			return;
 		*(*(i->second.begin() + (num - 1))) = group;
 	}
 
@@ -220,9 +223,11 @@ namespace FIX
 			result += i->getFixString();
 
 			// add groups if they exist
-			if (!m_groups.size()) continue;
+			if (!m_groups.size())
+				continue;
 			Groups::const_iterator j = m_groups.find(i->getTag());
-			if (j == m_groups.end()) continue;
+			if (j == m_groups.end())
+				continue;
 			std::vector < FieldMap* > ::const_iterator k;
 			for (k = j->second.begin(); k != j->second.end(); ++k)
 				(*k)->calculateString(result);
@@ -230,18 +235,14 @@ namespace FIX
 		return result;
 	}
 
-	int FieldMap::calculateLength(int beginStringField,
-		int bodyLengthField,
-		int checkSumField) const
+	int FieldMap::calculateLength(int beginStringField, int bodyLengthField, int checkSumField) const
 	{
 		int result = 0;
 		Fields::const_iterator i;
 		for (i = m_fields.begin(); i != m_fields.end(); ++i)
 		{
 			int tag = i->getTag();
-			if (tag != beginStringField
-				&& tag != bodyLengthField
-				&& tag != checkSumField)
+			if (tag != beginStringField && tag != bodyLengthField && tag != checkSumField)
 			{
 				result += i->getLength();
 			}
@@ -276,5 +277,4 @@ namespace FIX
 		}
 		return result;
 	}
-
 }

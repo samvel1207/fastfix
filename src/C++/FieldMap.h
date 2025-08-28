@@ -101,8 +101,7 @@ namespace FIX
 		typedef Groups::iterator g_iterator;
 		typedef Groups::const_iterator g_const_iterator;
 
-		FieldMap(const message_order& order =
-			message_order(message_order::normal));
+		FieldMap(const message_order& order = message_order(message_order::normal));
 
 		FieldMap(const int order[]);
 
@@ -114,7 +113,6 @@ namespace FIX
 
 		/// Set a field without type checking
 		void setField(const FieldBase& field, bool overwrite = true)
-			throw(RepeatedTag)
 		{
 			if (!overwrite)
 			{
@@ -136,7 +134,6 @@ namespace FIX
 
 		/// Set a field without a field class
 		void setField(int tag, const std::string& value)
-			throw(RepeatedTag, NoTagValue)
 		{
 			FieldBase fieldBase(tag, value);
 			setField(fieldBase);
@@ -153,8 +150,7 @@ namespace FIX
 		}
 
 		/// Get a field without type checking
-		FieldBase& getField(FieldBase& field)
-			const throw(FieldNotFound)
+		FieldBase& getField(FieldBase& field) const
 		{
 			field = getFieldRef(field.getTag());
 			return field;
@@ -162,15 +158,13 @@ namespace FIX
 
 		// OMD_THIRD_PARTY_CHANGE: mede this function virtual in order to override it in FIX::Message class and handle it correctly
 		/// Get a field without a field class
-		virtual const std::string& getField(int tag)
-			const throw(FieldNotFound)
+		virtual const std::string& getField(int tag) const
 		{
 			return getFieldRef(tag).getString();
 		}
 
 		/// Get direct access to a field through a reference
-		const FieldBase& getFieldRef(int tag)
-			const throw(FieldNotFound)
+		const FieldBase& getFieldRef(int tag) const
 		{
 			Fields::const_iterator iter = findTag(tag);
 			if (iter == m_fields.end())
@@ -179,8 +173,7 @@ namespace FIX
 		}
 
 		/// Get direct access to a field through a pointer
-		const FieldBase* const getFieldPtr(int tag)
-			const throw(FieldNotFound)
+		const FieldBase* const getFieldPtr(int tag) const
 		{
 			return &getFieldRef(tag);
 		}
@@ -219,7 +212,6 @@ namespace FIX
 
 		/// Get direct access to a field through a reference
 		FieldMap& getGroupRef(int num, int tag) const
-			throw(FieldNotFound)
 		{
 			Groups::const_iterator i = m_groups.find(tag);
 			if (i == m_groups.end()) throw FieldNotFound(tag);
@@ -230,7 +222,6 @@ namespace FIX
 
 		/// Get direct access to a field through a pointer
 		FieldMap* getGroupPtr(int num, int tag) const
-			throw(FieldNotFound)
 		{
 			return &getGroupRef(num, tag);
 		}
@@ -256,20 +247,43 @@ namespace FIX
 
 		std::string& calculateString(std::string&) const;
 
-		int calculateLength(int beginStringField = FIELD::BeginString,
-			int bodyLengthField = FIELD::BodyLength,
+		int calculateLength(int beginStringField = FIELD::BeginString, int bodyLengthField = FIELD::BodyLength,
 			int checkSumField = FIELD::CheckSum) const;
 
 		int calculateTotal(int checkSumField = FIELD::CheckSum) const;
 
-		iterator begin() { return m_fields.begin(); }
-		iterator end() { return m_fields.end(); }
-		const_iterator begin() const { return m_fields.begin(); }
-		const_iterator end() const { return m_fields.end(); }
-		g_iterator g_begin() { return m_groups.begin(); }
-		g_iterator g_end() { return m_groups.end(); }
-		g_const_iterator g_begin() const { return m_groups.begin(); }
-		g_const_iterator g_end() const { return m_groups.end(); }
+		iterator begin()
+		{
+			return m_fields.begin();
+		}
+		iterator end()
+		{
+			return m_fields.end();
+		}
+		const_iterator begin() const
+		{
+			return m_fields.begin();
+		}
+		const_iterator end() const
+		{
+			return m_fields.end();
+		}
+		g_iterator g_begin()
+		{
+			return m_groups.begin();
+		}
+		g_iterator g_end()
+		{
+			return m_groups.end();
+		}
+		g_const_iterator g_begin() const
+		{
+			return m_groups.begin();
+		}
+		g_const_iterator g_end() const
+		{
+			return m_groups.end();
+		}
 
 	protected:
 
@@ -352,8 +366,7 @@ namespace FIX
 				return m_fields.end();
 
 			const FieldBase& last = m_fields.back();
-			if (m_order(last.getTag(), tag) ||
-				last.getTag() == tag)
+			if (m_order(last.getTag(), tag) || last.getTag() == tag)
 			{
 				return m_fields.end();
 			}
