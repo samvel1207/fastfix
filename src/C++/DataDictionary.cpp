@@ -120,10 +120,8 @@ namespace FIX
 		return *this;
 	}
 
-	void DataDictionary::validate(const Message& message,
-		const DataDictionary* const pSessionDD,
+	void DataDictionary::validate(const Message& message, const DataDictionary* const pSessionDD,
 		const DataDictionary* const pAppDD)
-		throw(FIX::Exception)
 	{
 		const Header& header = message.getHeader();
 		const BeginString& beginString = FIELD_GET_REF(header, BeginString);
@@ -168,7 +166,7 @@ namespace FIX
 		FieldMap::const_iterator i;
 		for (i = map.begin(); i != map.end(); ++i)
 		{
-			const FieldBase& field = (*i);
+			const FieldBase& field = i->second;
 			if (i != map.begin() && (field.getTag() == lastField))
 				throw RepeatedTag(lastField);
 			checkHasValue(field);

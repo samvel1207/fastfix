@@ -220,12 +220,12 @@ namespace FIX
 		Fields::const_iterator i;
 		for (i = m_fields.begin(); i != m_fields.end(); ++i)
 		{
-			result += i->getFixString();
+			result += i->second.getFixString();
 
 			// add groups if they exist
 			if (!m_groups.size())
 				continue;
-			Groups::const_iterator j = m_groups.find(i->getTag());
+			Groups::const_iterator j = m_groups.find(i->second.getTag());
 			if (j == m_groups.end())
 				continue;
 			std::vector < FieldMap* > ::const_iterator k;
@@ -241,10 +241,10 @@ namespace FIX
 		Fields::const_iterator i;
 		for (i = m_fields.begin(); i != m_fields.end(); ++i)
 		{
-			int tag = i->getTag();
+			int tag = i->second.getTag();
 			if (tag != beginStringField && tag != bodyLengthField && tag != checkSumField)
 			{
-				result += i->getLength();
+				result += i->second.getLength();
 			}
 		}
 
@@ -264,8 +264,8 @@ namespace FIX
 		Fields::const_iterator i;
 		for (i = m_fields.begin(); i != m_fields.end(); ++i)
 		{
-			if (i->getTag() != checkSumField)
-				result += i->getTotal();
+			if (i->second.getTag() != checkSumField)
+				result += i->second.getTotal();
 		}
 
 		Groups::const_iterator j;

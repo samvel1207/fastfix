@@ -296,8 +296,8 @@ namespace FIX
 		std::string name;
 		for (i = fields.begin(); i != fields.end(); ++i)
 		{
-			int field = i->getTag();
-			std::string value = i->getString();
+			int field = i->second.getTag();
+			std::string value = i->second.getString();
 
 			stream << std::setw(space) << " " << "<field ";
 			if (s_dataDictionary.get() && s_dataDictionary->getFieldName(field, name))
@@ -366,7 +366,7 @@ namespace FIX
 					}
 				}
 
-				m_header.appendField(field);
+				m_header.addField(field);
 
 				if (pSessionDataDictionary)
 					setGroup("_header_", field, string, pos, getHeader(), *pSessionDataDictionary);
@@ -374,7 +374,7 @@ namespace FIX
 			else if (isTrailerField(field, pSessionDataDictionary))
 			{
 				type = trailer;
-				m_trailer.appendField(field);
+				m_trailer.addField(field);
 
 				if (pSessionDataDictionary)
 					setGroup("_trailer_", field, string, pos, getTrailer(), *pSessionDataDictionary);
@@ -388,26 +388,19 @@ namespace FIX
 				}
 
 				type = body;
-				appendField(field);
+				addField(field);
 
 				if (pApplicationDataDictionary)
 					setGroup(msg, field, string, pos, *this, *pApplicationDataDictionary);
 			}
 		}
 
-		// sort fields
-		m_header.sortFields();
-		sortFields();
-		m_trailer.sortFields();
-
 		if (doValidation)
 			validate();
 	}
 
-	void Message::setGroup(const std::string& msg, const FieldBase& field,
-		const std::string& string,
-		std::string::size_type& pos, FieldMap& map,
-		const DataDictionary& dataDictionary)
+	void Message::setGroup(const std::string& msg, const FieldBase& field, const std::string& string,
+		std::string::size_type& pos, FieldMap& map, const DataDictionary& dataDictionary)
 	{
 		int group = field.getTag();
 		int delim;
@@ -463,11 +456,10 @@ namespace FIX
 				return false;
 
 			if (isHeaderField(field))
-				m_header.appendField(field);
+				m_header.addField(field);
 			else break;
 		}
 
-		m_header.sortFields();
 		return true;
 	}
 
@@ -657,7 +649,7 @@ namespace FIX
 
 			try
 			{
-				const FieldBase& fieldLength = location->reverse_find(lenField);
+				const FieldBase& fieldLength = location->getFieldRef(lenField);
 				soh = valueStart + IntConvertor::convert(fieldLength.getString());
 			}
 			catch (FieldNotFound&)

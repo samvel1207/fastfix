@@ -358,7 +358,8 @@ namespace FIX
 
 		bool isGoodTime(const SendingTime& sendingTime)
 		{
-			if (!m_checkLatency) return true;
+			if (!m_checkLatency)
+				return true;
 			UtcTimeStamp now;
 			return labs(now - sendingTime) <= m_maxLatency;
 		}
@@ -375,13 +376,12 @@ namespace FIX
 		{
 			return msgSeqNum < (m_state.getNextTargetMsgSeqNum());
 		}
-		bool isCorrectCompID(const SenderCompID& senderCompID,
-			const TargetCompID& targetCompID)
+		bool isCorrectCompID(const SenderCompID& senderCompID, const TargetCompID& targetCompID)
 		{
-			if (!m_checkCompId) return true;
+			if (!m_checkCompId)
+				return true;
 
-			return
-				m_sessionID.getSenderCompID().getValue() == targetCompID.getValue()
+			return m_sessionID.getSenderCompID().getValue() == targetCompID.getValue()
 				&& m_sessionID.getTargetCompID().getValue() == senderCompID.getValue();
 		}
 		bool shouldSendReset();
