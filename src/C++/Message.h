@@ -162,16 +162,26 @@ namespace FIX
 		Message(const std::string& string, bool validate = true, bool noDataFields = false);
 
 		/// Construct a message from a string using a data dictionary
-		Message(const std::string& string, const FIX::DataDictionary& dataDictionary,
-			bool validate = true, bool noDataFields = false);
+		Message(const std::string& string, const FIX::DataDictionary& dataDictionary, bool validate = true,
+			bool noDataFields = false);
+
+		/// Construct a message from a string using a data dictionary OMD way
+		Message(const std::string& string, const FIX::DataDictionary& dataDictionary, bool validate, bool noDataFields,
+			FieldMap::Fields* global_fields);
 
 		/// Construct a message from a string using a session and application data dictionary
 		Message(const std::string& string, const FIX::DataDictionary& sessionDataDictionary,
 			const FIX::DataDictionary& applicationDataDictionary, bool validate = true, bool noDataFields = false);
 
+		/// Construct a message from a string using a session and application data dictionary OMD way
+		Message(const std::string& string, const FIX::DataDictionary& sessionDataDictionary,
+			const FIX::DataDictionary& applicationDataDictionary, bool validate, bool noDataFields,
+			FieldMap::Fields* global_fields);
+
 		/// Construct a message from a string using a data dictionary
 		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order, 
-			const std::string& string, const FIX::DataDictionary& dataDictionary, bool validate = true, bool noDataFields = false);
+			const std::string& string, const FIX::DataDictionary& dataDictionary, bool validate = true,
+			bool noDataFields = false);
 
 		/// Construct a message from a string using a session and application data dictionary
 		Message(const message_order& hdrOrder, const message_order& trlOrder, const message_order& order,

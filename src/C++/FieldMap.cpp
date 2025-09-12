@@ -33,18 +33,28 @@ namespace FIX
 
 	FieldMap::FieldMap(const message_order& order, int size)
 		: m_order(order)
+		, m_global_fields(nullptr)
 	{
 		m_fields.reserve(size);
 	}
 
 	FieldMap::FieldMap(const message_order& order /*= message_order(message_order::normal)*/)
 		: m_order(order)
+		, m_global_fields(nullptr)
 	{
 		m_fields.reserve(DEFAULT_SIZE);
 	}
 
+	FieldMap::FieldMap(FieldMap::Fields* global_fields, const message_order& order)
+		: m_order(order)
+		, m_global_fields(global_fields)
+	{
+		m_field_tags.reserve(DEFAULT_SIZE);
+	}
+
 	FieldMap::FieldMap(const int order[])
 		: m_order(message_order(order))
+		, m_global_fields(nullptr)
 	{
 		m_fields.reserve(DEFAULT_SIZE);
 	}
@@ -61,10 +71,15 @@ namespace FIX
 
 	FieldMap& FieldMap::operator=(const FieldMap& rhs)
 	{
+		if (rhs.m_global_fields != nullptr)
+			throw RuntimeError("Internal error. Can't copy FieldMap object when it is created in OMD mode");
+
 		clear();
 
 		m_fields = rhs.m_fields;
 		m_order = rhs.m_order;
+		m_global_fields = rhs.m_global_fields;
+		m_field_tags = rhs.m_field_tags;
 
 		Groups::const_iterator i;
 		for (i = rhs.m_groups.begin(); i != rhs.m_groups.end(); ++i)
@@ -156,11 +171,26 @@ namespace FIX
 		}
 	}
 
-	void FieldMap::removeField(int field)
+	void FieldMap::removeField(int tag)
 	{
-		Fields::iterator i = findTag(field);
-		if (i != m_fields.end())
-			m_fields.erase(i);
+		if (m_global_fields != nullptr)
+		{
+			if ((*m_global_fields)[tag].m_initialized)
+			{
+				auto iter = std::lower_bound(m_field_tags.begin(), m_field_tags.end(), tag);
+				if (iter == m_field_tags.end())
+					throw RuntimeError("Internal error, removed value must be initialized");
+
+				(*m_global_fields)[tag].m_initialized = false;
+				m_field_tags.erase(iter);
+			}
+		}
+		else
+		{
+			Fields::iterator i = findTag(tag);
+			if (i != m_fields.end())
+				m_fields.erase(i);
+		}
 	}
 
 	bool FieldMap::hasGroup(int num, int field) const
@@ -184,13 +214,16 @@ namespace FIX
 
 	void FieldMap::clear()
 	{
-		m_fields.clear();
-
-		Groups::iterator i;
-		for (i = m_groups.begin(); i != m_groups.end(); ++i)
+		for (std::vector<int>::iterator it = m_field_tags.begin(); it < m_field_tags.end(); ++it)
 		{
-			std::vector < FieldMap* > ::iterator j;
-			for (j = i->second.begin(); j != i->second.end(); ++j)
+			(*m_global_fields)[*it].m_initialized = false;
+		}
+		m_field_tags.clear();
+
+		m_fields.clear();
+		for (Groups::iterator i = m_groups.begin(); i != m_groups.end(); ++i)
+		{
+			for (std::vector<FieldMap*>::iterator j = i->second.begin(); j != i->second.end(); ++j)
 				delete* j;
 		}
 		m_groups.clear();
@@ -198,12 +231,12 @@ namespace FIX
 
 	bool FieldMap::isEmpty()
 	{
-		return m_fields.empty();
+		return m_fields.empty() && m_field_tags.empty();
 	}
 
 	size_t FieldMap::totalFields() const
 	{
-		size_t result = m_fields.size();
+		size_t result = m_fields.size() + m_field_tags.size(); // one of them must be 0
 
 		Groups::const_iterator i;
 		for (i = m_groups.begin(); i != m_groups.end(); ++i)
@@ -217,8 +250,7 @@ namespace FIX
 
 	std::string& FieldMap::calculateString(std::string& result) const
 	{
-		Fields::const_iterator i;
-		for (i = m_fields.begin(); i != m_fields.end(); ++i)
+		for (const_iterator i = begin(); i != end(); ++i)
 		{
 			result += i->getFixString();
 
@@ -238,8 +270,7 @@ namespace FIX
 	int FieldMap::calculateLength(int beginStringField, int bodyLengthField, int checkSumField) const
 	{
 		int result = 0;
-		Fields::const_iterator i;
-		for (i = m_fields.begin(); i != m_fields.end(); ++i)
+		for (const_iterator i = begin(); i != end(); ++i)
 		{
 			int tag = i->getTag();
 			if (tag != beginStringField && tag != bodyLengthField && tag != checkSumField)
@@ -261,8 +292,7 @@ namespace FIX
 	int FieldMap::calculateTotal(int checkSumField) const
 	{
 		int result = 0;
-		Fields::const_iterator i;
-		for (i = m_fields.begin(); i != m_fields.end(); ++i)
+		for (const_iterator i = begin(); i != end(); ++i)
 		{
 			if (i->getTag() != checkSumField)
 				result += i->getTotal();

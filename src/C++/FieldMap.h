@@ -91,17 +91,285 @@ namespace FIX
 		FieldMap(const message_order& order, int size);
 
 	public:
-
 		typedef std::vector < FieldBase, ALLOCATOR< FieldBase > > Fields;
 		typedef std::map < int, std::vector < FieldMap* >, std::less<int>,
 			ALLOCATOR<std::pair<const int, std::vector< FieldMap* > > > > Groups;
 
-		typedef Fields::iterator iterator;
-		typedef Fields::const_iterator const_iterator;
+		class fields_iterator
+		{
+		public:
+			using iterator_category = std::random_access_iterator_tag;
+			using value_type = FieldBase;
+			using difference_type = std::ptrdiff_t;
+			using pointer = FieldBase*;
+			using reference = FieldBase&;
+
+			fields_iterator() = default;
+			fields_iterator(FieldMap::Fields* global_fields, std::vector<int>* field_tags,
+				FieldMap::Fields* fields, bool end_flag)
+				: m_global_fields(global_fields)
+				, m_field_tags(field_tags)
+				, m_fields(fields)
+			{
+				if (!end_flag)
+				{
+					m_omd_it = m_field_tags->begin();
+					m_fit = m_fields->begin();
+				}
+				else
+				{
+					m_omd_it = m_field_tags->end();
+					m_fit = m_fields->end();
+				}
+			}
+
+			reference operator*() const
+			{
+				if (m_global_fields != nullptr)
+				{
+					int tag = *m_omd_it;
+					return (*m_global_fields)[tag];
+				}
+				else
+				{
+					return *m_fit;
+				}
+			}
+
+			pointer operator->() const
+			{
+				return &(operator*());
+			}
+
+			fields_iterator& operator++()
+			{
+				if (m_global_fields != nullptr)
+					++m_omd_it;
+				else
+					++m_fit;
+				return *this;
+			}
+
+			fields_iterator operator++(int)
+			{
+				fields_iterator tmp = *this;
+				if (m_global_fields != nullptr)
+					++m_omd_it;
+				else
+					++m_fit;
+				return tmp;
+			}
+
+			fields_iterator& operator--()
+			{
+				if (m_global_fields != nullptr)
+					--m_omd_it;
+				else
+					--m_fit;
+				return *this;
+			}
+			fields_iterator operator--(int)
+			{
+				fields_iterator tmp = *this;
+				if (m_global_fields != nullptr)
+					--m_omd_it;
+				else
+					--m_fit;
+				return tmp; }
+
+			bool operator==(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it == other.m_omd_it;
+				else
+					return m_fit == other.m_fit;
+			}
+			bool operator!=(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it != other.m_omd_it;
+				else
+					return m_fit != other.m_fit;
+			}
+			bool operator<(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it < other.m_omd_it;
+				else
+					return m_fit < other.m_fit;
+			}
+			bool operator<=(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it <= other.m_omd_it;
+				else
+					return m_fit <= other.m_fit;
+			}
+			bool operator>(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it > other.m_omd_it;
+				else
+					return m_fit > other.m_fit;
+			}
+			bool operator>=(const fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it >= other.m_omd_it;
+				else
+					return m_fit >= other.m_fit;
+			}
+
+		private:
+			FieldMap::Fields* m_global_fields;
+			std::vector<int>* m_field_tags;
+			std::vector<int>::iterator m_omd_it;
+			FieldMap::Fields* m_fields;
+			FieldMap::Fields::iterator m_fit;
+		};
+
+		class const_fields_iterator
+		{
+		public:
+			using iterator_category = std::random_access_iterator_tag;
+			using value_type = const FieldBase;
+			using difference_type = std::ptrdiff_t;
+			using pointer = const FieldBase*;
+			using reference = const FieldBase&;
+
+			const_fields_iterator() = default;
+			const_fields_iterator(const FieldMap::Fields* global_fields, const std::vector<int>* field_tags,
+				const FieldMap::Fields* fields, bool end_flag)
+				: m_global_fields(global_fields)
+				, m_field_tags(field_tags)
+				, m_fields(fields)
+			{
+				if (!end_flag)
+				{
+					m_omd_it = m_field_tags->begin();
+					m_fit = m_fields->begin();
+				}
+				else
+				{
+					m_omd_it = m_field_tags->end();
+					m_fit = m_fields->end();
+				}
+			}
+
+			reference operator*() const
+			{
+				if (m_global_fields != nullptr)
+				{
+					int tag = *m_omd_it;
+					return (*m_global_fields)[tag];
+				}
+				else
+				{
+					return *m_fit;
+				}
+			}
+
+			pointer operator->() const
+			{
+				return &(operator*());
+			}
+
+			const_fields_iterator& operator++()
+			{
+				if (m_global_fields != nullptr)
+					++m_omd_it;
+				else
+					++m_fit;
+				return *this;
+			}
+
+			const_fields_iterator operator++(int)
+			{
+				const_fields_iterator tmp = *this;
+				if (m_global_fields != nullptr)
+					++m_omd_it;
+				else
+					++m_fit;
+				return tmp;
+			}
+
+			const_fields_iterator& operator--()
+			{
+				if (m_global_fields != nullptr)
+					--m_omd_it;
+				else
+					--m_fit;
+				return *this;
+			}
+			const_fields_iterator operator--(int)
+			{
+				const_fields_iterator tmp = *this;
+				if (m_global_fields != nullptr)
+					--m_omd_it;
+				else
+					--m_fit;
+				return tmp;
+			}
+
+			bool operator==(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it == other.m_omd_it;
+				else
+					return m_fit == other.m_fit;
+			}
+			bool operator!=(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it != other.m_omd_it;
+				else
+					return m_fit != other.m_fit;
+			}
+			bool operator<(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it < other.m_omd_it;
+				else
+					return m_fit < other.m_fit;
+			}
+			bool operator<=(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it <= other.m_omd_it;
+				else
+					return m_fit <= other.m_fit;
+			}
+			bool operator>(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it > other.m_omd_it;
+				else
+					return m_fit > other.m_fit;
+			}
+			bool operator>=(const const_fields_iterator& other) const
+			{
+				if (m_global_fields != nullptr)
+					return m_omd_it >= other.m_omd_it;
+				else
+					return m_fit >= other.m_fit;
+			}
+
+		private:
+			const FieldMap::Fields* m_global_fields;
+			const std::vector<int>* m_field_tags;
+			std::vector<int>::const_iterator m_omd_it;
+			const FieldMap::Fields* m_fields;
+			FieldMap::Fields::const_iterator m_fit;
+		};
+
+		typedef fields_iterator iterator;
+		typedef const_fields_iterator const_iterator;
 		typedef Groups::iterator g_iterator;
 		typedef Groups::const_iterator g_const_iterator;
 
 		FieldMap(const message_order& order = message_order(message_order::normal));
+
+		FieldMap(Fields* global_fields, const message_order& order = message_order(message_order::normal));
 
 		FieldMap(const int order[]);
 
@@ -120,14 +388,14 @@ namespace FIX
 			}
 			else
 			{
-				Fields::iterator i = findTag(field.getTag());
-				if (i == m_fields.end())
+				FieldBase* field_ptr = findTagOmd(field.getTag());
+				if (field_ptr == nullptr)
 				{
 					addField(field);
 				}
 				else
 				{
-					i->setString(field.getString());
+					field_ptr->setString(field.getString());
 				}
 			}
 		}
@@ -142,10 +410,10 @@ namespace FIX
 		/// Get a field if set
 		bool getFieldIfSet(FieldBase& field) const
 		{
-			Fields::const_iterator iter = findTag(field.getTag());
-			if (iter == m_fields.end())
+			const FieldBase* field_ptr = findTagOmd(field.getTag());
+			if (field_ptr == nullptr)
 				return false;
-			field = (*iter);
+			field = (*field_ptr);
 			return true;
 		}
 
@@ -166,10 +434,10 @@ namespace FIX
 		/// Get direct access to a field through a reference
 		const FieldBase& getFieldRef(int tag) const
 		{
-			Fields::const_iterator iter = findTag(tag);
-			if (iter == m_fields.end())
+			const FieldBase* field_ptr = findTagOmd(tag);
+			if (field_ptr == nullptr)
 				throw FieldNotFound(tag);
-			return (*iter);
+			return (*field_ptr);
 		}
 
 		/// Get direct access to a field through a pointer
@@ -188,7 +456,7 @@ namespace FIX
 		/// Check to see if a field is set by referencing its number
 		virtual bool isSetField(int tag) const
 		{
-			return findTag(tag) != m_fields.end();
+			return findTagOmd(tag) != nullptr;
 		}
 
 		/// Remove a field. If field is not present, this is a no-op.
@@ -205,7 +473,6 @@ namespace FIX
 
 		/// Get a specific instance of a group.
 		FieldMap& getGroup(int num, int tag, FieldMap& group) const
-			throw(FieldNotFound)
 		{
 			return group = getGroupRef(num, tag);
 		}
@@ -214,9 +481,12 @@ namespace FIX
 		FieldMap& getGroupRef(int num, int tag) const
 		{
 			Groups::const_iterator i = m_groups.find(tag);
-			if (i == m_groups.end()) throw FieldNotFound(tag);
-			if (num <= 0) throw FieldNotFound(tag);
-			if (i->second.size() < (unsigned)num) throw FieldNotFound(tag);
+			if (i == m_groups.end())
+				throw FieldNotFound(tag);
+			if (num <= 0)
+				throw FieldNotFound(tag);
+			if (i->second.size() < (unsigned)num)
+				throw FieldNotFound(tag);
 			return *(*(i->second.begin() + (num - 1)));
 		}
 
@@ -254,19 +524,19 @@ namespace FIX
 
 		iterator begin()
 		{
-			return m_fields.begin();
+			return iterator(m_global_fields, &m_field_tags, &m_fields, false);
 		}
 		iterator end()
 		{
-			return m_fields.end();
+			return iterator(m_global_fields, &m_field_tags, &m_fields, true);
 		}
 		const_iterator begin() const
 		{
-			return m_fields.begin();
+			return const_iterator(m_global_fields, &m_field_tags, &m_fields, false);
 		}
 		const_iterator end() const
 		{
-			return m_fields.end();
+			return const_iterator(m_global_fields, &m_field_tags, &m_fields, true);
 		}
 		g_iterator g_begin()
 		{
@@ -291,14 +561,21 @@ namespace FIX
 
 		void addField(const FieldBase& field)
 		{
-			Fields::iterator iter = findPositionFor(field.getTag());
-			if (iter == m_fields.end())
+			int tag = field.getTag();
+			if (m_global_fields != nullptr)
 			{
-				m_fields.push_back(field);
+				if (tag >= m_global_fields->size())
+					throw RuntimeError("Internal error, vector index is out of range");
+				(*m_global_fields)[tag] = field;
+				m_field_tags.push_back(tag);
 			}
 			else
 			{
-				m_fields.insert(iter, field);
+				Fields::iterator iter = findPositionFor(tag);
+				if (iter == m_fields.end())
+					m_fields.push_back(field);
+				else
+					m_fields.insert(iter, field);
 			}
 		}
 
@@ -306,36 +583,84 @@ namespace FIX
 		// message fields are not yet sorted so regular find*** functions might return wrong results
 		const FieldBase& reverse_find(int tag) const
 		{
-			Fields::const_reverse_iterator iter = std::find_if(m_fields.rbegin(), m_fields.rend(), finder(tag));
-			if (iter == m_fields.rend())
-				throw FieldNotFound(tag);
-
-			return *iter;
+			if (m_global_fields != nullptr)
+			{
+				const FieldBase* field = findTagOmd(tag);
+				if (field == nullptr)
+					throw FieldNotFound(tag);
+				return *field;
+			}
+			else
+			{
+				Fields::const_reverse_iterator iter = std::find_if(m_fields.rbegin(), m_fields.rend(), finder(tag));
+				if (iter == m_fields.rend())
+					throw FieldNotFound(tag);
+				return *iter;
+			}
 		}
 
 		// append field to message without sorting
 		// only applicable during message decoding
 		void appendField(const FieldBase& field)
 		{
-			m_fields.push_back(field);
+			if (m_global_fields != nullptr)
+			{
+				addField(field);
+			}
+			else
+			{
+				m_fields.push_back(field);
+			}
 		}
 
 		// sort fields after message decoding
 		void sortFields()
 		{
 			std::sort(m_fields.begin(), m_fields.end(), sorter(m_order));
+			std::sort(m_field_tags.begin(), m_field_tags.end());
 		}
 
 	private:
-
-		Fields::const_iterator findTag(int tag) const
+		Fields::iterator findTag(int tag)
 		{
 			return lookup(m_fields.begin(), m_fields.end(), tag);
 		}
 
-		Fields::iterator findTag(int tag)
+		const FieldBase* findTagOmd(int tag) const
 		{
-			return lookup(m_fields.begin(), m_fields.end(), tag);
+			if (m_global_fields != nullptr)
+			{
+				if ((*m_global_fields)[tag].m_initialized)
+					return &(*m_global_fields)[tag];
+				else
+					return nullptr;
+			}
+			else
+			{
+				Fields::const_iterator it = lookup(m_fields.begin(), m_fields.end(), tag);
+				if (it == m_fields.end())
+					return nullptr;
+				return &(*it);
+			}
+		}
+
+		FieldBase* findTagOmd(int tag)
+		{
+			if (m_global_fields != nullptr)
+			{
+				if ((*m_global_fields)[tag].m_initialized)
+					return &(*m_global_fields)[tag];
+				else
+					return nullptr;
+			}
+			else
+			{
+				Fields::iterator it = lookup(m_fields.begin(), m_fields.end(), tag);
+				if (it == m_fields.end())
+					return nullptr;
+				return &(*it);
+			}
+
 		}
 
 		template <typename Iterator>
@@ -351,8 +676,7 @@ namespace FIX
 				return std::find_if(begin, end, finder(tag));
 
 			Iterator iter = std::lower_bound(begin, end, tag, sorter(m_order));
-			if (iter != end &&
-				iter->getTag() == tag)
+			if (iter != end && iter->getTag() == tag)
 			{
 				return iter;
 			}
@@ -374,6 +698,8 @@ namespace FIX
 			return std::upper_bound(m_fields.begin(), m_fields.end(), tag, sorter(m_order));
 		}
 
+		Fields* m_global_fields;
+		std::vector<int> m_field_tags;
 		Fields m_fields;
 		Groups m_groups;
 		message_order m_order;

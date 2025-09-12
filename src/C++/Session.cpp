@@ -38,12 +38,9 @@ namespace FIX
 #define LOGEX( method ) try { method; } catch( std::exception& e ) \
   { m_state.onEvent( e.what() ); }
 
-	Session::Session(Application& application,
-		MessageStoreFactory& messageStoreFactory,
-		const SessionID& sessionID,
-		const DataDictionaryProvider& dataDictionaryProvider,
-		const TimeRange& sessionTime,
-		int heartBtInt, LogFactory* pLogFactory)
+	Session::Session(Application& application, MessageStoreFactory& messageStoreFactory, const SessionID& sessionID,
+		const DataDictionaryProvider& dataDictionaryProvider, const TimeRange& sessionTime, int heartBtInt,
+		LogFactory* pLogFactory)
 		: m_application(application),
 		m_sessionID(sessionID),
 		m_sessionTime(sessionTime),
@@ -66,7 +63,8 @@ namespace FIX
 		m_pLogFactory(pLogFactory),
 		m_pResponder(0),
 		m_noDataFields(false),
-		m_validateDictionary(true)
+		m_validateDictionary(true),
+		m_global_fields(2000)
 	{
 		m_state.heartBtInt(heartBtInt);
 		m_state.initiate(heartBtInt != 0);
@@ -1266,17 +1264,15 @@ namespace FIX
 		try
 		{
 			m_state.onIncoming(msg);
-			const DataDictionary& sessionDD =
-				m_dataDictionaryProvider.getSessionDataDictionary(m_sessionID.getBeginString());
+			const DataDictionary& sessionDD = m_dataDictionaryProvider.getSessionDataDictionary(m_sessionID.getBeginString());
 			if (m_sessionID.isFIXT())
 			{
-				const DataDictionary& applicationDD =
-					m_dataDictionaryProvider.getApplicationDataDictionary(m_senderDefaultApplVerID);
-				next(Message(msg, sessionDD, applicationDD, m_validateLengthAndChecksum, m_noDataFields), timeStamp, queued);
+				const DataDictionary& applicationDD = m_dataDictionaryProvider.getApplicationDataDictionary(m_senderDefaultApplVerID);
+				next(Message(msg, sessionDD, applicationDD, m_validateLengthAndChecksum, m_noDataFields, &m_global_fields), timeStamp, queued);
 			}
 			else
 			{
-				next(Message(msg, sessionDD, m_validateLengthAndChecksum, m_noDataFields), timeStamp, queued);
+				next(Message(msg, sessionDD, m_validateLengthAndChecksum, m_noDataFields, &m_global_fields), timeStamp, queued);
 			}
 		}
 		catch (InvalidMessage& e)

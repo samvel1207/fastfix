@@ -45,10 +45,7 @@ namespace FIX
 	class Session
 	{
 	public:
-		Session(Application&, MessageStoreFactory&,
-			const SessionID&,
-			const DataDictionaryProvider&,
-			const TimeRange&,
+		Session(Application&, MessageStoreFactory&, const SessionID&, const DataDictionaryProvider&, const TimeRange&,
 			int heartBtInt, LogFactory* pLogFactory);
 		virtual ~Session();
 
@@ -270,6 +267,7 @@ namespace FIX
 			else
 				m_timestampPrecision = 0;
 		}
+
 		int getTimestampPrecision()
 		{
 			return m_timestampPrecision;
@@ -317,7 +315,6 @@ namespace FIX
 		{
 			m_validateDictionary = value;
 		}
-
 
 		void setResponder(Responder* pR)
 		{
@@ -375,8 +372,7 @@ namespace FIX
 		{
 			return msgSeqNum < (m_state.getNextTargetMsgSeqNum());
 		}
-		bool isCorrectCompID(const SenderCompID& senderCompID,
-			const TargetCompID& targetCompID)
+		bool isCorrectCompID(const SenderCompID& senderCompID, const TargetCompID& targetCompID)
 		{
 			if (!m_checkCompId) return true;
 
@@ -455,6 +451,7 @@ namespace FIX
 		LogFactory* m_pLogFactory;
 		Responder* m_pResponder;
 		Mutex m_mutex;
+		FieldMap::Fields m_global_fields;
 
 		static Sessions s_sessions;
 		static SessionIDs s_sessionIDs;

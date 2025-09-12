@@ -83,19 +83,24 @@ namespace FIX
 		friend class Message;
 
 		/// Constructor which also calculates field metrics
-		FieldBase(int tag,
-			const char* valueStart,
-			const char* valueEnd,
-			const char* tagStart,
-			const char* tagEnd)
+		FieldBase(int tag, const char* valueStart, const char* valueEnd, const char* tagStart, const char* tagEnd)
 			: m_tag(tag)
 			, m_string(valueStart, valueEnd)
 			, m_metrics(calculateMetrics(tagStart, tagEnd))
+			, m_initialized(true)
 		{}
 
 	public:
+		FieldBase()
+			: m_metrics(no_metrics())
+			, m_initialized(false)
+		{}
+
 		FieldBase(int tag, const std::string& string)
-			: m_tag(tag), m_string(string), m_metrics(no_metrics())
+			: m_tag(tag)
+			, m_string(string)
+			, m_metrics(no_metrics())
+			, m_initialized(true)
 		{}
 
 		virtual ~FieldBase() {}
@@ -104,6 +109,7 @@ namespace FIX
 			: m_tag(rhs.getTag())
 			, m_string(rhs.m_string)
 			, m_metrics(rhs.m_metrics)
+			, m_initialized(true)
 		{
 
 		}
@@ -113,6 +119,7 @@ namespace FIX
 			m_tag = rhs.getTag();
 			m_string = rhs.m_string;
 			m_metrics = rhs.m_metrics;
+			m_initialized = rhs.m_initialized;
 			m_data.clear();
 
 			return *this;
@@ -192,6 +199,8 @@ namespace FIX
 		{
 			return m_tag < field.m_tag;
 		}
+
+		bool m_initialized;
 
 	private:
 

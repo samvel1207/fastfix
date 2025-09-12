@@ -73,9 +73,30 @@ namespace FIX
 		setString(string, validate, &dataDictionary, &dataDictionary);
 	}
 
+	Message::Message(const std::string& string, const DataDictionary& dataDictionary, bool validate,
+		bool noDataFields, FieldMap::Fields* global_fields)
+		: FieldMap(global_fields)
+		, m_validStructure(true)
+		, m_tag(0)
+		, m_noDataFields(noDataFields)
+	{
+		setString(string, validate, &dataDictionary, &dataDictionary);
+	}
+
 	Message::Message(const std::string& string, const DataDictionary& sessionDataDictionary,
 		const DataDictionary& applicationDataDictionary, bool validate, bool noDataFields)
 		: m_validStructure(true)
+		, m_tag(0)
+		, m_noDataFields(noDataFields)
+	{
+		setString(string, validate, &sessionDataDictionary, &applicationDataDictionary);
+	}
+
+	Message::Message(const std::string& string, const DataDictionary& sessionDataDictionary,
+		const DataDictionary& applicationDataDictionary, bool validate, bool noDataFields,
+		FieldMap::Fields* global_fields)
+		: FieldMap(global_fields)
+		, m_validStructure(true)
 		, m_tag(0)
 		, m_noDataFields(noDataFields)
 	{
@@ -404,10 +425,8 @@ namespace FIX
 			validate();
 	}
 
-	void Message::setGroup(const std::string& msg, const FieldBase& field,
-		const std::string& string,
-		std::string::size_type& pos, FieldMap& map,
-		const DataDictionary& dataDictionary)
+	void Message::setGroup(const std::string& msg, const FieldBase& field, const std::string& string,
+		std::string::size_type& pos, FieldMap& map, const DataDictionary& dataDictionary)
 	{
 		int group = field.getTag();
 		int delim;
