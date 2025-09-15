@@ -71,14 +71,11 @@ namespace FIX
 
 	FieldMap& FieldMap::operator=(const FieldMap& rhs)
 	{
-		if (rhs.m_global_fields != nullptr)
-			throw RuntimeError("Internal error. Can't copy FieldMap object when it is created in OMD mode");
-
 		clear();
 
 		m_fields = rhs.m_fields;
 		m_order = rhs.m_order;
-		m_global_fields = rhs.m_global_fields;
+		m_global_fields = rhs.m_global_fields; // this is risky, but in case of OMD messages copy happens only in case if exceptions and the original we don't need basically
 		m_field_tags = rhs.m_field_tags;
 
 		Groups::const_iterator i;
