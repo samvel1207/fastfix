@@ -19,8 +19,8 @@
 **
 ****************************************************************************/
 
-#ifndef FIX_FILESTORE_H
-#define FIX_FILESTORE_H
+#ifndef FIX_MMAPSTORE_H
+#define FIX_MMAPSTORE_H
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4503 4355 4786 4290 )
@@ -33,15 +33,37 @@
 
 namespace FIX
 {
-	class Session;
-
-	/// Creates a file based implementation of MessageStore.
-	class FileStoreFactory : public MessageStoreFactory
+	class MemoryMappedFile
 	{
 	public:
-		FileStoreFactory(const SessionSettings& settings)
+		MemoryMappedFile(const char* filename, size_t size);
+		~MemoryMappedFile();
+
+		void open();
+		void close();
+		void* data();
+
+	private:
+		std::string m_filename;
+		size_t m_size;
+		void* m_ptr;
+#ifdef _WIN32
+		HANDLE m_hFile = INVALID_HANDLE_VALUE;
+		HANDLE m_hMap = nullptr;
+#else
+		int m_fd = -1;
+#endif
+	};
+
+	class Session;
+
+	/// Creates a memory mapped based implementation of MessageStore.
+	class MMapStoreFactory : public MessageStoreFactory
+	{
+	public:
+		MMapStoreFactory(const SessionSettings& settings)
 			: m_settings(settings) {};
-		FileStoreFactory(const std::string& path)
+		MMapStoreFactory(const std::string& path)
 			: m_path(path) {};
 
 		MessageStore* create(const SessionID&);
@@ -53,36 +75,31 @@ namespace FIX
 	/*! @} */
 
 	/**
-	 * File based implementation of MessageStore.
+	 * Memory map based implementation of MessageStore.
+	 * Three files are created by this implementation. One for storing outgoing
+	 * messages, one for indexing message locations and the last one to store 
+	 * senderSeqNum, targetSeqNum and the session creation time.
 	 *
-	 * Four files are created by this implementation.  One for storing outgoing
-	 * messages, one for indexing message locations, one for storing sequence numbers,
-	 * and one for storing the session creation time.
-	 *
-	 * The formats of the files are:<br>
+	 * The format of the file is:<br>
 	 * &nbsp;&nbsp;
 	 *   [path]+[BeginString]-[SenderCompID]-[TargetCompID].body<br>
 	 * &nbsp;&nbsp;
 	 *   [path]+[BeginString]-[SenderCompID]-[TargetCompID].header<br>
 	 * &nbsp;&nbsp;
-	 *   [path]+[BeginString]-[SenderCompID]-[TargetCompID].seqnums<br>
-	 * &nbsp;&nbsp;
-	 *   [path]+[BeginString]-[SenderCompID]-[TargetCompID].session<br>
-	 *
-	 *
-	 * The messages file is a pure stream of %FIX messages.<br><br>
-	 * The sequence number file is in the format of<br>
-	 * &nbsp;&nbsp;
-	 *   [SenderMsgSeqNum] : [TargetMsgSeqNum]<br><br>
-	 * The session file is a UTC timestamp in the format of<br>
-	 * &nbsp;&nbsp;
-	 *   YYYYMMDD-HH:MM:SS
+	 *   [path]+[BeginString]-[SenderCompID]-[TargetCompID].mmap<br>
 	 */
-	class FileStore : public MessageStore
+	class MMapStore : public MessageStore
 	{
+		struct MMapFileData
+		{
+			int senderSeqNum;
+			int targetSeqNum;
+			char time[24]; // must include '\0'
+		};
+
 	public:
-		FileStore(std::string, const SessionID& s);
-		virtual ~FileStore();
+		MMapStore(std::string, const SessionID& s);
+		virtual ~MMapStore();
 
 		bool set(int, const std::string&);
 		void get(int, int, std::vector < std::string >&) const;
@@ -111,22 +128,20 @@ namespace FIX
 		void populateCache();
 		void setSeqNum();
 		void setSession();
-
-		bool get(int, std::string&) const;
+		bool get(int msgSeqNum, std::string& msg) const;
 
 		MemoryStore m_cache;
 		NumToOffset m_offsets;
 
+		std::string m_mmapFileName;
 		std::string m_msgFileName;
 		std::string m_headerFileName;
-		std::string m_seqNumsFileName;
-		std::string m_sessionFileName;
 
 		FILE* m_msgFile;
 		FILE* m_headerFile;
-		FILE* m_seqNumsFile;
-		FILE* m_sessionFile;
+		std::unique_ptr<MemoryMappedFile> m_mmapFile;
+		MMapFileData* m_mmapData;
 	};
 }
 
-#endif //FIX_FILESTORE_H
+#endif //FIX_MMAPSTORE_H

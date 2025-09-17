@@ -32,67 +32,83 @@
 
 namespace FIX
 {
-class Session;
+	class Session;
 
-/**
- * Null implementation of MessageStore.
- *
- * Will not actually store messages.  Useful for admin-only or market
- * data-only applications.
- */
-class NullStoreFactory : public MessageStoreFactory
-{
-public:
-  MessageStore* create( const SessionID& );
-  void destroy( MessageStore* );
-};
-/*! @} */
+	/**
+	 * Null implementation of MessageStore.
+	 *
+	 * Will not actually store messages.  Useful for admin-only or market
+	 * data-only applications.
+	 */
+	class NullStoreFactory : public MessageStoreFactory
+	{
+	public:
+		MessageStore* create(const SessionID&);
+		void destroy(MessageStore*);
+	};
+	/*! @} */
 
 
-/**
- * Null implementation of MessageStore.
- *
- * Will not actually store messages.  Useful for admin-only or market
- * data-only applications.
- */
-class NullStore : public MessageStore
-{
-public:
-  NullStore() : m_nextSenderMsgSeqNum( 1 ), m_nextTargetMsgSeqNum( 1 ) {}
+	/**
+	 * Null implementation of MessageStore.
+	 *
+	 * Will not actually store messages.  Useful for admin-only or market
+	 * data-only applications.
+	 */
+	class NullStore : public MessageStore
+	{
+	public:
+		NullStore() : m_nextSenderMsgSeqNum(1), m_nextTargetMsgSeqNum(1) {}
 
-  bool set( int, const std::string& ) throw ( IOException );
-  void get( int, int, std::vector < std::string > & ) const throw ( IOException );
+		bool set(int, const std::string&);
+		void get(int, int, std::vector < std::string >&) const;
 
-  int getNextSenderMsgSeqNum() const throw ( IOException )
-  { return m_nextSenderMsgSeqNum; }
-  int getNextTargetMsgSeqNum() const throw ( IOException )
-  { return m_nextTargetMsgSeqNum; }
-  void setNextSenderMsgSeqNum( int value ) throw ( IOException )
-  { m_nextSenderMsgSeqNum = value; }
-  void setNextTargetMsgSeqNum( int value ) throw ( IOException )
-  { m_nextTargetMsgSeqNum = value; }
-  void incrNextSenderMsgSeqNum() throw ( IOException )
-  { ++m_nextSenderMsgSeqNum; }
-  void incrNextTargetMsgSeqNum() throw ( IOException )
-  { ++m_nextTargetMsgSeqNum; }
+		int getNextSenderMsgSeqNum() const
+		{
+			return m_nextSenderMsgSeqNum;
+		}
+		int getNextTargetMsgSeqNum() const
+		{
+			return m_nextTargetMsgSeqNum;
+		}
+		void setNextSenderMsgSeqNum(int value)
+		{
+			m_nextSenderMsgSeqNum = value;
+		}
+		void setNextTargetMsgSeqNum(int value)
+		{
+			m_nextTargetMsgSeqNum = value;
+		}
+		void incrNextSenderMsgSeqNum()
+		{
+			++m_nextSenderMsgSeqNum;
+		}
+		void incrNextTargetMsgSeqNum()
+		{
+			++m_nextTargetMsgSeqNum;
+		}
 
-  void setCreationTime( const UtcTimeStamp& creationTime ) throw ( IOException )
-  { m_creationTime = creationTime; }
-  UtcTimeStamp getCreationTime() const throw ( IOException )
-  { return m_creationTime; }
+		void setCreationTime(const UtcTimeStamp& creationTime)
+		{
+			m_creationTime = creationTime;
+		}
+		UtcTimeStamp getCreationTime() const
+		{
+			return m_creationTime;
+		}
 
-  void reset() throw ( IOException )
-  {
-    m_nextSenderMsgSeqNum = 1; m_nextTargetMsgSeqNum = 1;
-    m_creationTime.setCurrent();
-  }
-  void refresh() throw ( IOException ) {}
+		void reset()
+		{
+			m_nextSenderMsgSeqNum = 1; m_nextTargetMsgSeqNum = 1;
+			m_creationTime.setCurrent();
+		}
+		void refresh() {}
 
-private:
-  int m_nextSenderMsgSeqNum;
-  int m_nextTargetMsgSeqNum;
-  UtcTimeStamp m_creationTime;
-};
+	private:
+		int m_nextSenderMsgSeqNum;
+		int m_nextTargetMsgSeqNum;
+		UtcTimeStamp m_creationTime;
+	};
 }
 
 #endif // FIX_NULLSTORE_H

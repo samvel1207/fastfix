@@ -27,120 +27,117 @@
 
 namespace FIX
 {
-MessageStore* MemoryStoreFactory::create( const SessionID& )
-{
-  return new MemoryStore();
-}
+	MessageStore* MemoryStoreFactory::create(const SessionID&)
+	{
+		return new MemoryStore();
+	}
 
-void MemoryStoreFactory::destroy( MessageStore* pStore )
-{
-  delete pStore;
-}
+	void MemoryStoreFactory::destroy(MessageStore* pStore)
+	{
+		delete pStore;
+	}
 
-bool MemoryStore::set( int msgSeqNum, const std::string& msg )
-throw( IOException )
-{
-  m_messages[ msgSeqNum ] = msg;
-  return true;
-}
+	bool MemoryStore::set(int msgSeqNum, const std::string& msg)
+	{
+		m_messages[msgSeqNum] = msg;
+		return true;
+	}
 
-void MemoryStore::get( int begin, int end,
-                       std::vector < std::string > & messages ) const
-throw( IOException )
-{
-  messages.clear();
-  Messages::const_iterator find = m_messages.find( begin );
-  for ( ; find != m_messages.end() && find->first <= end; ++find )
-    messages.push_back( find->second );
-}
+	void MemoryStore::get(int begin, int end, std::vector < std::string >& messages) const
+	{
+		messages.clear();
+		Messages::const_iterator find = m_messages.find(begin);
+		for (; find != m_messages.end() && find->first <= end; ++find)
+			messages.push_back(find->second);
+	}
 
-MessageStore* MessageStoreFactoryExceptionWrapper::create( const SessionID& sessionID, bool& threw, ConfigError& ex )
-{
-  threw = false;
-  try { return m_pFactory->create( sessionID ); }
-  catch ( ConfigError & e ) { threw = true; ex = e; return 0; }
-}
+	MessageStore* MessageStoreFactoryExceptionWrapper::create(const SessionID& sessionID, bool& threw, ConfigError& ex)
+	{
+		threw = false;
+		try { return m_pFactory->create(sessionID); }
+		catch (ConfigError& e) { threw = true; ex = e; return 0; }
+	}
 
-void MessageStoreFactoryExceptionWrapper::destroy( MessageStore* pStore )
-{
-  m_pFactory->destroy( pStore );
-}
+	void MessageStoreFactoryExceptionWrapper::destroy(MessageStore* pStore)
+	{
+		m_pFactory->destroy(pStore);
+	}
 
-bool MessageStoreExceptionWrapper::set( int num, const std::string& msg, bool& threw, IOException& ex )
-{
-  threw = false;
-  try { return m_pStore->set( num, msg ); }
-  catch ( IOException & e ) { threw = true; ex = e; return false; }
-}
+	bool MessageStoreExceptionWrapper::set(int num, const std::string& msg, bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { return m_pStore->set(num, msg); }
+		catch (IOException& e) { threw = true; ex = e; return false; }
+	}
 
-void MessageStoreExceptionWrapper::get( int begin, int end, std::vector < std::string > & msgs, bool& threw, IOException& ex ) const
-{
-  threw = false;
-  try { m_pStore->get( begin, end, msgs ); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::get(int begin, int end, std::vector < std::string >& msgs, bool& threw, IOException& ex) const
+	{
+		threw = false;
+		try { m_pStore->get(begin, end, msgs); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-int MessageStoreExceptionWrapper::getNextSenderMsgSeqNum( bool& threw, IOException& ex ) const
-{
-  threw = false;
-  try { return m_pStore->getNextSenderMsgSeqNum(); }
-  catch ( IOException & e ) { threw = true; ex = e; return 0; }
-}
+	int MessageStoreExceptionWrapper::getNextSenderMsgSeqNum(bool& threw, IOException& ex) const
+	{
+		threw = false;
+		try { return m_pStore->getNextSenderMsgSeqNum(); }
+		catch (IOException& e) { threw = true; ex = e; return 0; }
+	}
 
-int MessageStoreExceptionWrapper::getNextTargetMsgSeqNum( bool& threw, IOException& ex ) const
-{
-  threw = false;
-  try { return m_pStore->getNextTargetMsgSeqNum(); }
-  catch ( IOException & e ) { threw = true; ex = e; return 0; }
-}
+	int MessageStoreExceptionWrapper::getNextTargetMsgSeqNum(bool& threw, IOException& ex) const
+	{
+		threw = false;
+		try { return m_pStore->getNextTargetMsgSeqNum(); }
+		catch (IOException& e) { threw = true; ex = e; return 0; }
+	}
 
-void MessageStoreExceptionWrapper::setNextSenderMsgSeqNum( int num, bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->setNextSenderMsgSeqNum( num ); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::setNextSenderMsgSeqNum(int num, bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->setNextSenderMsgSeqNum(num); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-void MessageStoreExceptionWrapper::setNextTargetMsgSeqNum( int num, bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->setNextTargetMsgSeqNum( num ); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::setNextTargetMsgSeqNum(int num, bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->setNextTargetMsgSeqNum(num); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-void MessageStoreExceptionWrapper::incrNextSenderMsgSeqNum( bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->incrNextSenderMsgSeqNum(); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::incrNextSenderMsgSeqNum(bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->incrNextSenderMsgSeqNum(); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-void MessageStoreExceptionWrapper::incrNextTargetMsgSeqNum( bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->incrNextTargetMsgSeqNum(); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::incrNextTargetMsgSeqNum(bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->incrNextTargetMsgSeqNum(); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-UtcTimeStamp MessageStoreExceptionWrapper::getCreationTime( bool& threw, IOException& ex )
-{
-  threw = false;
-  try { return m_pStore->getCreationTime(); }
-  catch ( IOException & e ) { threw = true; ex = e; return UtcTimeStamp(); }
-}
+	UtcTimeStamp MessageStoreExceptionWrapper::getCreationTime(bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { return m_pStore->getCreationTime(); }
+		catch (IOException& e) { threw = true; ex = e; return UtcTimeStamp(); }
+	}
 
-void MessageStoreExceptionWrapper::reset( bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->reset(); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::reset(bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->reset(); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
-void MessageStoreExceptionWrapper::refresh( bool& threw, IOException& ex )
-{
-  threw = false;
-  try { m_pStore->refresh(); }
-  catch ( IOException & e ) { threw = true; ex = e; }
-}
+	void MessageStoreExceptionWrapper::refresh(bool& threw, IOException& ex)
+	{
+		threw = false;
+		try { m_pStore->refresh(); }
+		catch (IOException& e) { threw = true; ex = e; }
+	}
 
 } //namespace FIX

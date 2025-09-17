@@ -80,6 +80,7 @@ namespace FIX
 	const char LOGON_TIMEOUT[] = "LogonTimeout";
 	const char LOGOUT_TIMEOUT[] = "LogoutTimeout";
 	const char FILE_STORE_PATH[] = "FileStorePath";
+	const char MMAP_STORE_PATH[] = "MMapStorePath";
 	const char MYSQL_STORE_USECONNECTIONPOOL[] = "MySQLStoreUseConnectionPool";
 	const char MYSQL_STORE_DATABASE[] = "MySQLStoreDatabase";
 	const char MYSQL_STORE_USER[] = "MySQLStoreUser";

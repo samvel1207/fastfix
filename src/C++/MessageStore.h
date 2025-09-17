@@ -33,142 +33,158 @@
 
 namespace FIX
 {
-class MessageStore;
+	class MessageStore;
 
-/**
- * This interface must be implemented to create a MessageStore.
- */
-class MessageStoreFactory
-{
-public:
-  virtual ~MessageStoreFactory() {}
-  virtual MessageStore* create( const SessionID& ) = 0;
-  virtual void destroy( MessageStore* ) = 0;
-};
+	/**
+	 * This interface must be implemented to create a MessageStore.
+	 */
+	class MessageStoreFactory
+	{
+	public:
+		virtual ~MessageStoreFactory() {}
+		virtual MessageStore* create(const SessionID&) = 0;
+		virtual void destroy(MessageStore*) = 0;
+	};
 
-/**
- * Creates a memory based implementation of MessageStore.
- *
- * This will lose all data on process termination. This class should only
- * be used for test applications, never in production.
- */
-class MemoryStoreFactory : public MessageStoreFactory
-{
-public:
-  MessageStore* create( const SessionID& );
-  void destroy( MessageStore* );
-};
+	/**
+	 * Creates a memory based implementation of MessageStore.
+	 *
+	 * This will lose all data on process termination. This class should only
+	 * be used for test applications, never in production.
+	 */
+	class MemoryStoreFactory : public MessageStoreFactory
+	{
+	public:
+		MessageStore* create(const SessionID&);
+		void destroy(MessageStore*);
+	};
 
-/**
- * This interface must be implemented to store and retrieve messages and
- * sequence numbers.
- */
-class MessageStore
-{
-public:
-  virtual ~MessageStore() {}
+	/**
+	 * This interface must be implemented to store and retrieve messages and
+	 * sequence numbers.
+	 */
+	class MessageStore
+	{
+	public:
+		virtual ~MessageStore() {}
 
-  virtual bool set( int, const std::string& )
-  throw ( IOException ) = 0;
-  virtual void get( int, int, std::vector < std::string > & ) const
-  throw ( IOException ) = 0;
+		virtual bool set(int, const std::string&)
+			throw (IOException) = 0;
+		virtual void get(int, int, std::vector < std::string >&) const
+			throw (IOException) = 0;
 
-  virtual int getNextSenderMsgSeqNum() const throw ( IOException ) = 0;
-  virtual int getNextTargetMsgSeqNum() const throw ( IOException ) = 0;
-  virtual void setNextSenderMsgSeqNum( int ) throw ( IOException ) = 0;
-  virtual void setNextTargetMsgSeqNum( int ) throw ( IOException ) = 0;
-  virtual void incrNextSenderMsgSeqNum() throw ( IOException ) = 0;
-  virtual void incrNextTargetMsgSeqNum() throw ( IOException ) = 0;
+		virtual int getNextSenderMsgSeqNum() const = 0;
+		virtual int getNextTargetMsgSeqNum() const = 0;
+		virtual void setNextSenderMsgSeqNum(int) = 0;
+		virtual void setNextTargetMsgSeqNum(int) = 0;
+		virtual void incrNextSenderMsgSeqNum() = 0;
+		virtual void incrNextTargetMsgSeqNum() = 0;
 
-  virtual UtcTimeStamp getCreationTime() const throw ( IOException ) = 0;
+		virtual UtcTimeStamp getCreationTime() const = 0;
 
-  virtual void reset() throw ( IOException ) = 0;
-  virtual void refresh() throw ( IOException ) = 0;
-};
-/*! @} */
+		virtual void reset() = 0;
+		virtual void refresh() = 0;
+	};
+	/*! @} */
 
-/**
- * Memory based implementation of MessageStore.
- *
- * This will lose all data on process terminition. This class should only
- * be used for test applications, never in production.
- */
-class MemoryStore : public MessageStore
-{
-public:
-  MemoryStore() : m_nextSenderMsgSeqNum( 1 ), m_nextTargetMsgSeqNum( 1 ) {}
+	/**
+	 * Memory based implementation of MessageStore.
+	 *
+	 * This will lose all data on process terminition. This class should only
+	 * be used for test applications, never in production.
+	 */
+	class MemoryStore : public MessageStore
+	{
+	public:
+		MemoryStore() : m_nextSenderMsgSeqNum(1), m_nextTargetMsgSeqNum(1) {}
 
-  bool set( int, const std::string& ) throw ( IOException );
-  void get( int, int, std::vector < std::string > & ) const throw ( IOException );
+		bool set(int, const std::string&);
+		void get(int, int, std::vector < std::string >&) const;
 
-  int getNextSenderMsgSeqNum() const throw ( IOException )
-  { return m_nextSenderMsgSeqNum; }
-  int getNextTargetMsgSeqNum() const throw ( IOException )
-  { return m_nextTargetMsgSeqNum; }
-  void setNextSenderMsgSeqNum( int value ) throw ( IOException )
-  { m_nextSenderMsgSeqNum = value; }
-  void setNextTargetMsgSeqNum( int value ) throw ( IOException )
-  { m_nextTargetMsgSeqNum = value; }
-  void incrNextSenderMsgSeqNum() throw ( IOException )
-  { ++m_nextSenderMsgSeqNum; }
-  void incrNextTargetMsgSeqNum() throw ( IOException )
-  { ++m_nextTargetMsgSeqNum; }
+		int getNextSenderMsgSeqNum() const
+		{
+			return m_nextSenderMsgSeqNum;
+		}
+		int getNextTargetMsgSeqNum() const
+		{
+			return m_nextTargetMsgSeqNum;
+		}
+		void setNextSenderMsgSeqNum(int value)
+		{
+			m_nextSenderMsgSeqNum = value;
+		}
+		void setNextTargetMsgSeqNum(int value)
+		{
+			m_nextTargetMsgSeqNum = value;
+		}
+		void incrNextSenderMsgSeqNum()
+		{
+			++m_nextSenderMsgSeqNum;
+		}
+		void incrNextTargetMsgSeqNum()
+		{
+			++m_nextTargetMsgSeqNum;
+		}
 
-  void setCreationTime( const UtcTimeStamp& creationTime ) throw ( IOException )
-  { m_creationTime = creationTime; }
-  UtcTimeStamp getCreationTime() const throw ( IOException )
-  { return m_creationTime; }
+		void setCreationTime(const UtcTimeStamp& creationTime)
+		{
+			m_creationTime = creationTime;
+		}
+		UtcTimeStamp getCreationTime() const
+		{
+			return m_creationTime;
+		}
 
-  void reset() throw ( IOException )
-  {
-    m_nextSenderMsgSeqNum = 1; m_nextTargetMsgSeqNum = 1;
-    m_messages.clear(); m_creationTime.setCurrent();
-  }
-  void refresh() throw ( IOException ) {}
+		void reset()
+		{
+			m_nextSenderMsgSeqNum = 1; m_nextTargetMsgSeqNum = 1;
+			m_messages.clear(); m_creationTime.setCurrent();
+		}
+		void refresh() {}
 
-private:
-  typedef std::map < int, std::string > Messages;
+	private:
+		typedef std::map < int, std::string > Messages;
 
-  Messages m_messages;
-  int m_nextSenderMsgSeqNum;
-  int m_nextTargetMsgSeqNum;
-  UtcTimeStamp m_creationTime;
-};
+		Messages m_messages;
+		int m_nextSenderMsgSeqNum;
+		int m_nextTargetMsgSeqNum;
+		UtcTimeStamp m_creationTime;
+	};
 
-class MessageStoreFactoryExceptionWrapper
-{
-private:
-  MessageStoreFactory* m_pFactory;
-public:
-  MessageStoreFactoryExceptionWrapper( MessageStoreFactory* pFactory )
-  : m_pFactory( pFactory ) {}
+	class MessageStoreFactoryExceptionWrapper
+	{
+	private:
+		MessageStoreFactory* m_pFactory;
+	public:
+		MessageStoreFactoryExceptionWrapper(MessageStoreFactory* pFactory)
+			: m_pFactory(pFactory) {}
 
-  MessageStore* create( const SessionID&, bool&, ConfigError& );
-  void destroy( MessageStore* );
-};
+		MessageStore* create(const SessionID&, bool&, ConfigError&);
+		void destroy(MessageStore*);
+	};
 
-class MessageStoreExceptionWrapper
-{
-private:
-  MessageStore* m_pStore;
-public:
-  MessageStoreExceptionWrapper( MessageStore* pStore ) : m_pStore( pStore ) {}
-  ~MessageStoreExceptionWrapper() { delete m_pStore; }
+	class MessageStoreExceptionWrapper
+	{
+	private:
+		MessageStore* m_pStore;
+	public:
+		MessageStoreExceptionWrapper(MessageStore* pStore) : m_pStore(pStore) {}
+		~MessageStoreExceptionWrapper() { delete m_pStore; }
 
-  bool set( int, const std::string&, bool&, IOException& );
-  void get( int, int, std::vector < std::string > &, bool&, IOException& ) const;
-  int getNextSenderMsgSeqNum( bool&, IOException& ) const;
-  int getNextTargetMsgSeqNum( bool&, IOException& ) const;
-  void setNextSenderMsgSeqNum( int, bool&, IOException& );
-  void setNextTargetMsgSeqNum( int, bool&, IOException& );
-  void incrNextSenderMsgSeqNum( bool&, IOException& );
-  void incrNextTargetMsgSeqNum( bool&, IOException& );
+		bool set(int, const std::string&, bool&, IOException&);
+		void get(int, int, std::vector < std::string >&, bool&, IOException&) const;
+		int getNextSenderMsgSeqNum(bool&, IOException&) const;
+		int getNextTargetMsgSeqNum(bool&, IOException&) const;
+		void setNextSenderMsgSeqNum(int, bool&, IOException&);
+		void setNextTargetMsgSeqNum(int, bool&, IOException&);
+		void incrNextSenderMsgSeqNum(bool&, IOException&);
+		void incrNextTargetMsgSeqNum(bool&, IOException&);
 
-  UtcTimeStamp getCreationTime( bool&, IOException& );
+		UtcTimeStamp getCreationTime(bool&, IOException&);
 
-  void reset( bool&, IOException& );
-  void refresh( bool&, IOException& );
-};
+		void reset(bool&, IOException&);
+		void refresh(bool&, IOException&);
+	};
 }
 
 #endif //FIX_MESSAGESTORE_H

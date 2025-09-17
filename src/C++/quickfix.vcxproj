@@ -648,6 +648,7 @@
     <ClInclude Include="MessageCracker.h" />
     <ClInclude Include="MessageSorters.h" />
     <ClInclude Include="MessageStore.h" />
+    <ClInclude Include="MMapStore.h" />
     <ClInclude Include="Mutex.h" />
     <ClInclude Include="MySQLConnection.h" />
     <ClInclude Include="MySQLLog.h" />
@@ -707,6 +708,7 @@
     <ClCompile Include="Message.cpp" />
     <ClCompile Include="MessageSorters.cpp" />
     <ClCompile Include="MessageStore.cpp" />
+    <ClCompile Include="MMapStore.cpp" />
     <ClCompile Include="MySQLLog.cpp" />
     <ClCompile Include="MySQLStore.cpp" />
     <ClCompile Include="NullStore.cpp" />
