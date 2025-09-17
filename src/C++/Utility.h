@@ -79,6 +79,7 @@ typedef int ssize_t;
 #endif
 #include <sys/time.h>
 #include <sys/stat.h>
+#include <sys/mman.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
