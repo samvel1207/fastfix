@@ -53,6 +53,8 @@ libquickfix_la_SOURCES = \
 	NullStore.h \
 	FileStore.cpp \
 	FileStore.h \
+	MMapStore.cpp \
+	MMapStore.h \
 	MySQLConnection.h \
 	MySQLStore.cpp \
 	MySQLStore.h \

@@ -47,6 +47,7 @@ COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/Messag
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MessageCracker.h ${CMAKE_SOURCE_DIR}/include/quickfix/MessageCracker.h
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MessageSorters.h ${CMAKE_SOURCE_DIR}/include/quickfix/MessageSorters.h
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MessageStore.h ${CMAKE_SOURCE_DIR}/include/quickfix/MessageStore.h
+COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MMapStore.h ${CMAKE_SOURCE_DIR}/include/quickfix/MMapStore.h
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/Mutex.h ${CMAKE_SOURCE_DIR}/include/quickfix/Mutex.h
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MySQLConnection.h ${CMAKE_SOURCE_DIR}/include/quickfix/MySQLConnection.h
 COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/src/C++/MySQLLog.h ${CMAKE_SOURCE_DIR}/include/quickfix/MySQLLog.h
