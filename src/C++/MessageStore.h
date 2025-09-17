@@ -68,10 +68,8 @@ namespace FIX
 	public:
 		virtual ~MessageStore() {}
 
-		virtual bool set(int, const std::string&)
-			throw (IOException) = 0;
-		virtual void get(int, int, std::vector < std::string >&) const
-			throw (IOException) = 0;
+		virtual bool set(int, const std::string&) = 0;
+		virtual void get(int, int, std::vector < std::string >&) const = 0;
 
 		virtual int getNextSenderMsgSeqNum() const = 0;
 		virtual int getNextTargetMsgSeqNum() const = 0;
