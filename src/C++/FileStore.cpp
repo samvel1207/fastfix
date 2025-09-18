@@ -57,6 +57,7 @@ namespace FIX
 		m_headerFileName = prefix + "header";
 		m_seqNumsFileName = prefix + "seqnums";
 		m_sessionFileName = prefix + "session";
+		m_mmapFileName = prefix + "mmap";
 
 		try
 		{
@@ -87,6 +88,14 @@ namespace FIX
 		m_headerFile = 0;
 		m_seqNumsFile = 0;
 		m_sessionFile = 0;
+
+		if (file_exists(m_mmapFileName.c_str()))
+		{
+			// delete all files created via MMapStore
+			file_unlink(m_msgFileName.c_str());
+			file_unlink(m_headerFileName.c_str());
+			file_unlink(m_mmapFileName.c_str());
+		}
 
 		if (deleteFile)
 		{

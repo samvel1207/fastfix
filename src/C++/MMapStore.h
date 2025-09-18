@@ -137,6 +137,9 @@ namespace FIX
 		std::string m_msgFileName;
 		std::string m_headerFileName;
 
+		std::string m_seqNumsFileName;
+		std::string m_sessionFileName;
+
 		FILE* m_msgFile;
 		FILE* m_headerFile;
 		std::unique_ptr<MemoryMappedFile> m_mmapFile;

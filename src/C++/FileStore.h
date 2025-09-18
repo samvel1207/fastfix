@@ -121,6 +121,7 @@ namespace FIX
 		std::string m_headerFileName;
 		std::string m_seqNumsFileName;
 		std::string m_sessionFileName;
+		std::string m_mmapFileName;
 
 		FILE* m_msgFile;
 		FILE* m_headerFile;

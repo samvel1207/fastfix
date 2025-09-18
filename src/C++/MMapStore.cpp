@@ -64,20 +64,20 @@ namespace FIX
             throw ConfigError("MapViewOfFile failed");
         }
 #else
-        m_fd = open(m_filename.c_str(), O_RDWR | O_CREAT, 0666);
+        m_fd = ::open(m_filename.c_str(), O_RDWR | O_CREAT, 0666);
         if (m_fd == -1)
             throw ConfigError("open failed");
 
         if (ftruncate(m_fd, m_size) == -1)
         {
-            close(m_fd);
+            ::close(m_fd);
             throw ConfigError("ftruncate failed");
         }
 
         m_ptr = mmap(NULL, m_size, PROT_READ | PROT_WRITE, MAP_SHARED, m_fd, 0);
         if (m_ptr == MAP_FAILED)
         {
-            close(m_fd);
+            ::close(m_fd);
             throw ConfigError("mmap failed");
         }
 #endif
@@ -96,7 +96,7 @@ namespace FIX
         if (m_ptr)
             munmap(m_ptr, m_size);
         if (m_fd != -1)
-            close(m_fd);
+            ::close(m_fd);
 #endif
     }
 
@@ -127,6 +127,8 @@ namespace FIX
         m_msgFileName = prefix + "body";
         m_headerFileName = prefix + "header";
         m_mmapFileName = prefix + "mmap";
+        m_seqNumsFileName = prefix + "seqnums";
+        m_sessionFileName = prefix + "session";
 
         m_mmapFile.reset(new MemoryMappedFile(m_mmapFileName.c_str(), sizeof(MMapFileData)));
 
@@ -160,6 +162,15 @@ namespace FIX
         m_msgFile = nullptr;
         m_headerFile = nullptr;
 
+        if (file_exists(m_seqNumsFileName.c_str()))
+        {
+            // delete all files created via FileStore
+            file_unlink(m_msgFileName.c_str());
+            file_unlink(m_headerFileName.c_str());
+            file_unlink(m_seqNumsFileName.c_str());
+            file_unlink(m_sessionFileName.c_str());
+        }
+
         if (deleteFile)
         {
             file_unlink(m_msgFileName.c_str());
@@ -179,6 +190,9 @@ namespace FIX
             m_headerFile = file_fopen(m_headerFileName.c_str(), "w+");
         if (!m_headerFile)
             throw ConfigError("Could not open header file: " + m_headerFileName);
+
+        if (strlen(m_mmapData->time) == 0)
+            setSession();
 
         setNextSenderMsgSeqNum(getNextSenderMsgSeqNum());
         setNextTargetMsgSeqNum(getNextTargetMsgSeqNum());
@@ -223,7 +237,7 @@ namespace FIX
 
         std::string path;
         Dictionary settings = m_settings.get(s);
-        path = settings.getString(MMAP_STORE_PATH);
+        path = settings.getString(FILE_STORE_PATH);
         return new MMapStore(path, s);
     }
 

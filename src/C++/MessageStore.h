@@ -135,8 +135,10 @@ namespace FIX
 
 		void reset()
 		{
-			m_nextSenderMsgSeqNum = 1; m_nextTargetMsgSeqNum = 1;
-			m_messages.clear(); m_creationTime.setCurrent();
+			m_nextSenderMsgSeqNum = 1;
+			m_nextTargetMsgSeqNum = 1;
+			m_messages.clear();
+			m_creationTime.setCurrent();
 		}
 		void refresh() {}
 
