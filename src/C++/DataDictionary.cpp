@@ -503,8 +503,7 @@ namespace FIX
 		return lookupXMLFieldNumber(pDoc, name);
 	}
 
-	int DataDictionary::lookupXMLFieldNumber
-	(DOMDocument* pDoc, const std::string& name) const
+	int DataDictionary::lookupXMLFieldNumber(DOMDocument* pDoc, const std::string& name) const
 	{
 		NameToField::const_iterator i = m_names.find(name);
 		if (i == m_names.end())
@@ -513,9 +512,7 @@ namespace FIX
 	}
 
 	int DataDictionary::addXMLComponentFields(DOMDocument* pDoc, DOMNode* pNode,
-		const std::string& msgtype,
-		DataDictionary& DD,
-		bool componentRequired)
+		const std::string& msgtype, DataDictionary& DD, bool componentRequired)
 	{
 		int firstField = 0;
 
@@ -524,16 +521,14 @@ namespace FIX
 		if (!attrs->get("name", name))
 			throw ConfigError("No name given to component");
 
-		DOMNodePtr pComponentNode =
-			pDoc->getNode("/fix/components/component[@name='" + name + "']");
+		DOMNodePtr pComponentNode = pDoc->getNode("/fix/components/component[@name='" + name + "']");
 		if (pComponentNode.get() == 0)
 			throw ConfigError("Component not found: " + name);
 
 		DOMNodePtr pComponentFieldNode = pComponentNode->getFirstChildNode();
 		while (pComponentFieldNode.get())
 		{
-			if (pComponentFieldNode->getName() == "field"
-				|| pComponentFieldNode->getName() == "group")
+			if (pComponentFieldNode->getName() == "field" || pComponentFieldNode->getName() == "group")
 			{
 				DOMAttributesPtr attrs = pComponentFieldNode->getAttributes();
 				std::string name;
@@ -543,11 +538,9 @@ namespace FIX
 				if (firstField == 0) firstField = field;
 
 				std::string required;
-				if (attrs->get("required", required)
-					&& (required == "Y" || required == "y")
-					&& componentRequired)
+				if (attrs->get("required", required) && (required == "Y" || required == "y") && componentRequired)
 				{
-					addRequiredField(msgtype, field);
+					DD.addRequiredField(msgtype, field);
 				}
 
 				DD.addField(field);
@@ -559,8 +552,7 @@ namespace FIX
 				std::string required;
 				attrs->get("required", required);
 				bool isRequired = (required == "Y" || required == "y");
-				addXMLComponentFields(pDoc, pComponentFieldNode.get(),
-					msgtype, DD, isRequired);
+				addXMLComponentFields(pDoc, pComponentFieldNode.get(), msgtype, DD, isRequired);
 			}
 			if (pComponentFieldNode->getName() == "group")
 			{
@@ -570,15 +562,13 @@ namespace FIX
 				bool isRequired = (required == "Y" || required == "y");
 				addXMLGroup(pDoc, pComponentFieldNode.get(), msgtype, DD, isRequired);
 			}
-			RESET_AUTO_PTR(pComponentFieldNode,
-				pComponentFieldNode->getNextSiblingNode());
+			RESET_AUTO_PTR(pComponentFieldNode, pComponentFieldNode->getNextSiblingNode());
 		}
 		return firstField;
 	}
 
 	void DataDictionary::addXMLGroup(DOMDocument* pDoc, DOMNode* pNode,
-		const std::string& msgtype,
-		DataDictionary& DD, bool groupRequired)
+		const std::string& msgtype, DataDictionary& DD, bool groupRequired)
 	{
 		DOMAttributesPtr attrs = pNode->getAttributes();
 		std::string name;
@@ -598,9 +588,7 @@ namespace FIX
 
 				DOMAttributesPtr attrs = node->getAttributes();
 				std::string required;
-				if (attrs->get("required", required)
-					&& (required == "Y" || required == "y")
-					&& groupRequired)
+				if (attrs->get("required", required) && (required == "Y" || required == "y") && groupRequired)
 				{
 					groupDD.addRequiredField(msgtype, field);
 				}
@@ -615,22 +603,24 @@ namespace FIX
 				groupDD.addField(field);
 				DOMAttributesPtr attrs = node->getAttributes();
 				std::string required;
-				if (attrs->get("required", required)
-					&& (required == "Y" || required == "y")
-					&& groupRequired)
+				if (attrs->get("required", required) && (required == "Y" || required == "y") && groupRequired)
 				{
 					groupDD.addRequiredField(msgtype, field);
 				}
 				bool isRequired = false;
 				if (attrs->get("required", required))
+				{
 					isRequired = (required == "Y" || required == "y");
+				}
 				addXMLGroup(pDoc, node.get(), msgtype, groupDD, isRequired);
 			}
-			if (delim == 0) delim = field;
+			if (delim == 0)
+				delim = field;
 			RESET_AUTO_PTR(node, node->getNextSiblingNode());
 		}
 
-		if (delim) DD.addGroup(msgtype, group, delim, groupDD);
+		if (delim)
+			DD.addGroup(msgtype, group, delim, groupDD);
 	}
 
 	TYPE::Type DataDictionary::XMLTypeToType(const std::string& type) const
