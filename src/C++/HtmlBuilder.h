@@ -49,7 +49,7 @@ public:
   { m_stream << ">"; return *this; }
   TAG& text( const std::string& value )
   { m_value << value; text(); return *this; }
-  TAG& text( int value )
+  TAG& text(int64_t value)
   { m_value << value; text(); return *this; } 
 
  private:

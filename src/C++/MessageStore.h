@@ -68,13 +68,13 @@ namespace FIX
 	public:
 		virtual ~MessageStore() {}
 
-		virtual bool set(int, const std::string&) = 0;
-		virtual void get(int, int, std::vector < std::string >&) const = 0;
+		virtual bool set(int64_t, const std::string&) = 0;
+		virtual void get(int64_t, int64_t, std::vector < std::string >&) const = 0;
 
-		virtual int getNextSenderMsgSeqNum() const = 0;
-		virtual int getNextTargetMsgSeqNum() const = 0;
-		virtual void setNextSenderMsgSeqNum(int) = 0;
-		virtual void setNextTargetMsgSeqNum(int) = 0;
+		virtual int64_t getNextSenderMsgSeqNum() const = 0;
+		virtual int64_t getNextTargetMsgSeqNum() const = 0;
+		virtual void setNextSenderMsgSeqNum(int64_t) = 0;
+		virtual void setNextTargetMsgSeqNum(int64_t) = 0;
 		virtual void incrNextSenderMsgSeqNum() = 0;
 		virtual void incrNextTargetMsgSeqNum() = 0;
 
@@ -96,22 +96,22 @@ namespace FIX
 	public:
 		MemoryStore() : m_nextSenderMsgSeqNum(1), m_nextTargetMsgSeqNum(1) {}
 
-		bool set(int, const std::string&);
-		void get(int, int, std::vector < std::string >&) const;
+		bool set(int64_t, const std::string&);
+		void get(int64_t, int64_t, std::vector < std::string >&) const;
 
-		int getNextSenderMsgSeqNum() const
+		int64_t getNextSenderMsgSeqNum() const
 		{
 			return m_nextSenderMsgSeqNum;
 		}
-		int getNextTargetMsgSeqNum() const
+		int64_t getNextTargetMsgSeqNum() const
 		{
 			return m_nextTargetMsgSeqNum;
 		}
-		void setNextSenderMsgSeqNum(int value)
+		void setNextSenderMsgSeqNum(int64_t value)
 		{
 			m_nextSenderMsgSeqNum = value;
 		}
-		void setNextTargetMsgSeqNum(int value)
+		void setNextTargetMsgSeqNum(int64_t value)
 		{
 			m_nextTargetMsgSeqNum = value;
 		}
@@ -143,11 +143,11 @@ namespace FIX
 		void refresh() {}
 
 	private:
-		typedef std::map < int, std::string > Messages;
+		typedef std::map < int64_t, std::string > Messages;
 
 		Messages m_messages;
-		int m_nextSenderMsgSeqNum;
-		int m_nextTargetMsgSeqNum;
+		int64_t m_nextSenderMsgSeqNum;
+		int64_t m_nextTargetMsgSeqNum;
 		UtcTimeStamp m_creationTime;
 	};
 
@@ -173,10 +173,10 @@ namespace FIX
 
 		bool set(int, const std::string&, bool&, IOException&);
 		void get(int, int, std::vector < std::string >&, bool&, IOException&) const;
-		int getNextSenderMsgSeqNum(bool&, IOException&) const;
-		int getNextTargetMsgSeqNum(bool&, IOException&) const;
-		void setNextSenderMsgSeqNum(int, bool&, IOException&);
-		void setNextTargetMsgSeqNum(int, bool&, IOException&);
+		int64_t getNextSenderMsgSeqNum(bool&, IOException&) const;
+		int64_t getNextTargetMsgSeqNum(bool&, IOException&) const;
+		void setNextSenderMsgSeqNum(int64_t, bool&, IOException&);
+		void setNextTargetMsgSeqNum(int64_t, bool&, IOException&);
 		void incrNextSenderMsgSeqNum(bool&, IOException&);
 		void incrNextTargetMsgSeqNum(bool&, IOException&);
 

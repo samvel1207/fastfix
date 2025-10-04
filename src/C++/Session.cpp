@@ -335,8 +335,8 @@ namespace FIX
 		if (sequenceReset.getFieldIfSet(newSeqNo))
 		{
 			m_state.onEvent("Received SequenceReset FROM: "
-				+ IntConvertor::convert(getExpectedTargetNum()) +
-				" TO: " + IntConvertor::convert(newSeqNo));
+				+ Int64Convertor::convert(getExpectedTargetNum()) +
+				" TO: " + Int64Convertor::convert(newSeqNo));
 
 			if (newSeqNo > getExpectedTargetNum())
 				m_state.setNextTargetMsgSeqNum(MsgSeqNum(newSeqNo));
@@ -357,8 +357,8 @@ namespace FIX
 		resendRequest.getField(endSeqNo);
 
 		m_state.onEvent("Received ResendRequest FROM: "
-			+ IntConvertor::convert(beginSeqNo) +
-			" TO: " + IntConvertor::convert(endSeqNo));
+			+ Int64Convertor::convert(beginSeqNo) +
+			" TO: " + Int64Convertor::convert(endSeqNo));
 
 		std::string beginString = m_sessionID.getBeginString();
 		if ((beginString >= FIX::BeginString_FIX42 && endSeqNo == 0) ||
@@ -371,7 +371,7 @@ namespace FIX
 		if (!m_persistMessages)
 		{
 			endSeqNo = EndSeqNo(endSeqNo + 1);
-			int next = m_state.getNextSenderMsgSeqNum();
+			int64_t next = m_state.getNextSenderMsgSeqNum();
 			if (endSeqNo > next)
 				endSeqNo = EndSeqNo(next);
 			generateSequenceReset(beginSeqNo, endSeqNo);
@@ -384,8 +384,8 @@ namespace FIX
 		std::vector < std::string > ::iterator i;
 		MsgSeqNum msgSeqNum(0);
 		MsgType msgType;
-		int begin = 0;
-		int current = beginSeqNo;
+		int64_t begin = 0;
+		int64_t current = beginSeqNo;
 		std::string messageString;
 
 		for (i = messages.begin(); i != messages.end(); ++i)
@@ -454,7 +454,7 @@ namespace FIX
 					if (begin) generateSequenceReset(begin, msgSeqNum);
 					send(msg.toString(messageString));
 					m_state.onEvent("Resending Message: "
-						+ IntConvertor::convert(msgSeqNum));
+						+ Int64Convertor::convert(msgSeqNum));
 					begin = 0;
 				}
 				else
@@ -472,7 +472,7 @@ namespace FIX
 		if (endSeqNo > msgSeqNum)
 		{
 			endSeqNo = EndSeqNo(endSeqNo + 1);
-			int next = m_state.getNextSenderMsgSeqNum();
+			int64_t next = m_state.getNextSenderMsgSeqNum();
 			if (endSeqNo > next)
 				endSeqNo = EndSeqNo(next);
 			generateSequenceReset(beginSeqNo, endSeqNo);
@@ -521,7 +521,7 @@ namespace FIX
 		return sendRaw(message);
 	}
 
-	bool Session::sendRaw(Message& message, int num)
+	bool Session::sendRaw(Message& message, int64_t num)
 	{
 		Locker l(m_mutex);
 
@@ -727,19 +727,18 @@ namespace FIX
 		resendRequest.setField(endSeqNo);
 
 		// OMD_THIRD_PARTY_CHANGE: Set this in order to let our FixSubscriber class know the end of range 
-		// (SideValueInd is choosen randomly, it'll get removed before sending the message to the server)
-		SideValueInd sideValue(msgSeqNum);
+		MsgSeqNum sideValue(msgSeqNum);
 		resendRequest.setField(sideValue);
 
 		fill(resendRequest.getHeader());
 		sendRaw(resendRequest);
 
-		m_state.onEvent("Sent ResendRequest FROM: " + IntConvertor::convert(beginSeqNo) + " TO: " + IntConvertor::convert(endSeqNo));
+		m_state.onEvent("Sent ResendRequest FROM: " + Int64Convertor::convert(beginSeqNo) + " TO: " + Int64Convertor::convert(endSeqNo));
 
 		m_state.resendRange(beginSeqNo, msgSeqNum - 1);
 	}
 
-	void Session::generateSequenceReset(int beginSeqNo, int endSeqNo)
+	void Session::generateSequenceReset(int64_t beginSeqNo, int64_t endSeqNo)
 	{
 		SmartPtr<Message> pMsg(newMessage("4"));
 		Message& sequenceReset = *pMsg;
@@ -756,7 +755,7 @@ namespace FIX
 		sequenceReset.getHeader().setField(MsgSeqNum(beginSeqNo));
 		sequenceReset.setField(GapFillFlag(true));
 		sendRaw(sequenceReset, beginSeqNo);
-		m_state.onEvent("Sent SequenceReset TO: " + IntConvertor::convert(newSeqNo));
+		m_state.onEvent("Sent SequenceReset TO: " + Int64Convertor::convert(newSeqNo));
 	}
 
 	void Session::generateHeartbeat()
@@ -1080,8 +1079,8 @@ namespace FIX
 				if (*pMsgSeqNum >= range.second)
 				{
 					m_state.onEvent("ResendRequest for messages FROM: " +
-						IntConvertor::convert(range.first) + " TO: " +
-						IntConvertor::convert(range.second) +
+						Int64Convertor::convert(range.first) + " TO: " +
+						Int64Convertor::convert(range.second) +
 						" has been satisfied.");
 					m_state.resendRange(0, 0);
 				}
@@ -1209,9 +1208,9 @@ namespace FIX
 		header.getField(msgSeqNum);
 
 		m_state.onEvent("MsgSeqNum too high, expecting "
-			+ IntConvertor::convert(getExpectedTargetNum())
+			+ Int64Convertor::convert(getExpectedTargetNum())
 			+ " but received "
-			+ IntConvertor::convert(msgSeqNum));
+			+ Int64Convertor::convert(msgSeqNum));
 
 		m_state.queue(msgSeqNum, msg);
 
@@ -1222,8 +1221,8 @@ namespace FIX
 			if (!m_sendRedundantResendRequests && msgSeqNum >= range.first)
 			{
 				m_state.onEvent("Already sent ResendRequest FROM: " +
-					IntConvertor::convert(range.first) + " TO: " +
-					IntConvertor::convert(range.second) +
+					Int64Convertor::convert(range.first) + " TO: " +
+					Int64Convertor::convert(range.second) +
 					".  Not sending another.");
 				return;
 			}
@@ -1237,7 +1236,7 @@ namespace FIX
 		while (nextQueued(getExpectedTargetNum(), timeStamp)) {}
 	}
 
-	bool Session::nextQueued(int num, const UtcTimeStamp& timeStamp)
+	bool Session::nextQueued(int64_t num, const UtcTimeStamp& timeStamp)
 	{
 		Message msg;
 		MsgType msgType;
@@ -1245,7 +1244,7 @@ namespace FIX
 		if (m_state.retrieve(num, msg))
 		{
 			m_state.onEvent("Processing QUEUED message: "
-				+ IntConvertor::convert(num));
+				+ Int64Convertor::convert(num));
 			msg.getHeader().getField(msgType);
 			if (msgType == MsgType_Logon
 				|| msgType == MsgType_ResendRequest)

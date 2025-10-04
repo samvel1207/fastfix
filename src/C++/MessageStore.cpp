@@ -37,13 +37,13 @@ namespace FIX
 		delete pStore;
 	}
 
-	bool MemoryStore::set(int msgSeqNum, const std::string& msg)
+	bool MemoryStore::set(int64_t msgSeqNum, const std::string& msg)
 	{
 		m_messages[msgSeqNum] = msg;
 		return true;
 	}
 
-	void MemoryStore::get(int begin, int end, std::vector < std::string >& messages) const
+	void MemoryStore::get(int64_t begin, int64_t end, std::vector < std::string >& messages) const
 	{
 		messages.clear();
 		Messages::const_iterator find = m_messages.find(begin);
@@ -77,28 +77,28 @@ namespace FIX
 		catch (IOException& e) { threw = true; ex = e; }
 	}
 
-	int MessageStoreExceptionWrapper::getNextSenderMsgSeqNum(bool& threw, IOException& ex) const
+	int64_t MessageStoreExceptionWrapper::getNextSenderMsgSeqNum(bool& threw, IOException& ex) const
 	{
 		threw = false;
 		try { return m_pStore->getNextSenderMsgSeqNum(); }
 		catch (IOException& e) { threw = true; ex = e; return 0; }
 	}
 
-	int MessageStoreExceptionWrapper::getNextTargetMsgSeqNum(bool& threw, IOException& ex) const
+	int64_t MessageStoreExceptionWrapper::getNextTargetMsgSeqNum(bool& threw, IOException& ex) const
 	{
 		threw = false;
 		try { return m_pStore->getNextTargetMsgSeqNum(); }
 		catch (IOException& e) { threw = true; ex = e; return 0; }
 	}
 
-	void MessageStoreExceptionWrapper::setNextSenderMsgSeqNum(int num, bool& threw, IOException& ex)
+	void MessageStoreExceptionWrapper::setNextSenderMsgSeqNum(int64_t num, bool& threw, IOException& ex)
 	{
 		threw = false;
 		try { m_pStore->setNextSenderMsgSeqNum(num); }
 		catch (IOException& e) { threw = true; ex = e; }
 	}
 
-	void MessageStoreExceptionWrapper::setNextTargetMsgSeqNum(int num, bool& threw, IOException& ex)
+	void MessageStoreExceptionWrapper::setNextTargetMsgSeqNum(int64_t num, bool& threw, IOException& ex)
 	{
 		threw = false;
 		try { m_pStore->setNextTargetMsgSeqNum(num); }

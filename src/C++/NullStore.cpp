@@ -38,12 +38,12 @@ void NullStoreFactory::destroy( MessageStore* pStore )
   delete pStore;
 }
 
-bool NullStore::set( int msgSeqNum, const std::string& msg )
+bool NullStore::set(int64_t msgSeqNum, const std::string& msg )
 {
   return true;
 }
 
-void NullStore::get( int begin, int end, std::vector < std::string > & messages ) const
+void NullStore::get(int64_t begin, int64_t end, std::vector < std::string > & messages ) const
 {
   messages.clear();
 }

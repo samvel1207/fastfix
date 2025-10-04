@@ -137,11 +137,11 @@ namespace FIX
 		FILE* headerFile = file_fopen(m_headerFileName.c_str(), "r+");
 		if (headerFile)
 		{
-			int num;
+			int64_t num;
 			long offset;
 			std::size_t size;
 
-			while (FILE_FSCANF(headerFile, "%d,%ld,%lu ", &num, &offset, &size) == 3)
+			while (FILE_FSCANF(headerFile, "%lld,%ld,%zu ", &num, &offset, &size) == 3)
 			{
 				std::pair<NumToOffset::iterator, bool> it =
 					m_offsets.insert(NumToOffset::value_type(num, std::make_pair(offset, size)));
@@ -157,8 +157,8 @@ namespace FIX
 		FILE* seqNumsFile = file_fopen(m_seqNumsFileName.c_str(), "r+");
 		if (seqNumsFile)
 		{
-			int sender, target;
-			if (FILE_FSCANF(seqNumsFile, "%d : %d", &sender, &target) == 2)
+			int64_t sender, target;
+			if (FILE_FSCANF(seqNumsFile, "%lld : %lld", &sender, &target) == 2)
 			{
 				m_cache.setNextSenderMsgSeqNum(sender);
 				m_cache.setNextTargetMsgSeqNum(target);
@@ -198,7 +198,7 @@ namespace FIX
 		delete pStore;
 	}
 
-	bool FileStore::set(int msgSeqNum, const std::string& msg)
+	bool FileStore::set(int64_t msgSeqNum, const std::string& msg)
 	{
 		if (fseek(m_msgFile, 0, SEEK_END))
 			throw IOException("Cannot seek to end of " + m_msgFileName);
@@ -210,7 +210,7 @@ namespace FIX
 			throw IOException("Unable to get file pointer position from " + m_msgFileName);
 		std::size_t size = msg.size();
 
-		if (fprintf(m_headerFile, "%d,%ld,%lu ", msgSeqNum, offset, size) < 0)
+		if (fprintf(m_headerFile, "%lld,%ld,%zu ", msgSeqNum, offset, size) < 0)
 			throw IOException("Unable to write to file " + m_headerFileName);
 		std::pair<NumToOffset::iterator, bool> it =
 			m_offsets.insert(NumToOffset::value_type(msgSeqNum, std::make_pair(offset, size)));
@@ -228,34 +228,34 @@ namespace FIX
 		return true;
 	}
 
-	void FileStore::get(int begin, int end, std::vector < std::string >& result) const
+	void FileStore::get(int64_t begin, int64_t end, std::vector < std::string >& result) const
 	{
 		result.clear();
 		std::string msg;
-		for (int i = begin; i <= end; ++i)
+		for (int64_t i = begin; i <= end; ++i)
 		{
 			if (get(i, msg))
 				result.push_back(msg);
 		}
 	}
 
-	int FileStore::getNextSenderMsgSeqNum() const
+	int64_t FileStore::getNextSenderMsgSeqNum() const
 	{
 		return m_cache.getNextSenderMsgSeqNum();
 	}
 
-	int FileStore::getNextTargetMsgSeqNum() const
+	int64_t FileStore::getNextTargetMsgSeqNum() const
 	{
 		return m_cache.getNextTargetMsgSeqNum();
 	}
 
-	void FileStore::setNextSenderMsgSeqNum(int value)
+	void FileStore::setNextSenderMsgSeqNum(int64_t value)
 	{
 		m_cache.setNextSenderMsgSeqNum(value);
 		setSeqNum();
 	}
 
-	void FileStore::setNextTargetMsgSeqNum(int value)
+	void FileStore::setNextTargetMsgSeqNum(int64_t value)
 	{
 		m_cache.setNextTargetMsgSeqNum(value);
 		setSeqNum();
@@ -308,7 +308,7 @@ namespace FIX
 	void FileStore::setSeqNum()
 	{
 		rewind(m_seqNumsFile);
-		fprintf(m_seqNumsFile, "%10.10d : %10.10d",
+		fprintf(m_seqNumsFile, "%lld : %lld",
 			getNextSenderMsgSeqNum(), getNextTargetMsgSeqNum());
 		if (ferror(m_seqNumsFile))
 			throw IOException("Unable to write to file " + m_seqNumsFileName);
@@ -327,7 +327,7 @@ namespace FIX
 			throw IOException("Unable to flush file " + m_sessionFileName);
 	}
 
-	bool FileStore::get(int msgSeqNum, std::string& msg) const
+	bool FileStore::get(int64_t msgSeqNum, std::string& msg) const
 	{
 		NumToOffset::const_iterator find = m_offsets.find(msgSeqNum);
 		if (find == m_offsets.end()) return false;

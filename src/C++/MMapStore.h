@@ -92,8 +92,8 @@ namespace FIX
 	{
 		struct MMapFileData
 		{
-			int senderSeqNum;
-			int targetSeqNum;
+			int64_t senderSeqNum;
+			int64_t targetSeqNum;
 			char time[24]; // must include '\0'
 		};
 
@@ -101,13 +101,13 @@ namespace FIX
 		MMapStore(std::string, const SessionID& s);
 		virtual ~MMapStore();
 
-		bool set(int, const std::string&);
-		void get(int, int, std::vector < std::string >&) const;
+		bool set(int64_t, const std::string&);
+		void get(int64_t, int64_t, std::vector < std::string >&) const;
 
-		int getNextSenderMsgSeqNum() const;
-		int getNextTargetMsgSeqNum() const;
-		void setNextSenderMsgSeqNum(int value);
-		void setNextTargetMsgSeqNum(int value);
+		int64_t getNextSenderMsgSeqNum() const;
+		int64_t getNextTargetMsgSeqNum() const;
+		void setNextSenderMsgSeqNum(int64_t value);
+		void setNextTargetMsgSeqNum(int64_t value);
 		void incrNextSenderMsgSeqNum();
 		void incrNextTargetMsgSeqNum();
 
@@ -117,18 +117,14 @@ namespace FIX
 		void refresh();
 
 	private:
-#ifdef _MSC_VER
-		typedef std::pair < int, int > OffsetSize;
-#else
 		typedef std::pair < long, std::size_t > OffsetSize;
-#endif
-		typedef std::map < int, OffsetSize > NumToOffset;
+		typedef std::map < int64_t, OffsetSize > NumToOffset;
 
 		void open(bool deleteFile);
 		void populateCache();
 		void setSeqNum();
 		void setSession();
-		bool get(int msgSeqNum, std::string& msg) const;
+		bool get(int64_t msgSeqNum, std::string& msg) const;
 
 		MemoryStore m_cache;
 		NumToOffset m_offsets;

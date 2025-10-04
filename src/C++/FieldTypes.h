@@ -896,7 +896,7 @@ namespace FIX
 	typedef UtcTimeOnly UTCTIMEONLY;
 	typedef int NUMINGROUP;
 	typedef double PERCENTAGE;
-	typedef int SEQNUM;
+	typedef int64_t SEQNUM;
 	typedef int LENGTH;
 	typedef std::string COUNTRY;
 	typedef std::string TZTIMEONLY;

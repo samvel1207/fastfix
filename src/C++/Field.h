@@ -462,6 +462,36 @@ namespace FIX
 		}
 	};
 
+	/// Field that contains an 64 bit integer value
+	class Int64Field : public FieldBase
+	{
+	public:
+		explicit Int64Field(int field, int64_t data)
+			: FieldBase(field, Int64Convertor::convert(data)) {}
+		Int64Field(int field)
+			: FieldBase(field, "") {}
+
+		void setValue(int64_t value)
+		{
+			setString(Int64Convertor::convert(value));
+		}
+		int64_t getValue() const throw (IncorrectDataFormat)
+		{
+			try
+			{
+				return Int64Convertor::convert(getString());
+			}
+			catch (FieldConvertError&)
+			{
+				throw IncorrectDataFormat(getTag(), getString());
+			}
+		}
+		operator const int64_t() const
+		{
+			return getValue();
+		}
+	};
+
 	/// Field that contains a boolean value
 	class BoolField : public FieldBase
 	{
@@ -669,7 +699,7 @@ namespace FIX
 	typedef UtcDateField UtcDateOnlyField;
 	typedef IntField LengthField;
 	typedef IntField NumInGroupField;
-	typedef IntField SeqNumField;
+	typedef Int64Field SeqNumField;
 	typedef DoubleField PercentageField;
 	typedef StringField CountryField;
 	typedef StringField TzTimeOnlyField;

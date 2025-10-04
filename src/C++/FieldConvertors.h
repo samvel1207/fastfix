@@ -36,6 +36,7 @@
 #include <cstdio>
 #include <limits>
 #include <iterator>
+#include <charconv>
 
 namespace FIX
 {
@@ -200,6 +201,29 @@ namespace FIX
 		{
 			signed_int result = 0;
 			if (!convert(value.c_str(), value.c_str() + value.size(), result))
+				throw FieldConvertError(value);
+			else
+				return result;
+		}
+	};
+
+	/// Converts integer 64 to/from a string
+	struct Int64Convertor
+	{
+		static std::string convert(int64_t value)
+		{
+			// buffer is big enough for significant digits and extra digit,
+			// minus and null
+			char buffer[std::numeric_limits<int64_t>::digits10 + 3] = {0};
+			auto [ptr, ec] = std::to_chars(buffer, buffer + sizeof(buffer), value);
+			return std::string(buffer, ptr);
+		}
+
+		static int64_t convert(const std::string& value)
+		{
+			int64_t result = 0;
+			auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
+			if (ec != std::errc())
 				throw FieldConvertError(value);
 			else
 				return result;

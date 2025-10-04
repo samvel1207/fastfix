@@ -36,7 +36,7 @@ namespace FIX
 	/// Maintains all of state for the Session class.
 	class SessionState : public MessageStore, public Log
 	{
-		typedef std::map < int, Message > Messages;
+		typedef std::map < int64_t, Message > Messages;
 
 	public:
 		SessionState()
@@ -82,10 +82,10 @@ namespace FIX
 			return !(m_resendRange.first == 0 && m_resendRange.second == 0);
 		}
 
-		typedef std::pair<int, int> ResendRange;
+		typedef std::pair<int64_t, int64_t> ResendRange;
 
 		ResendRange resendRange() const { return m_resendRange; }
-		void resendRange(int begin, int end)
+		void resendRange(int64_t begin, int64_t end)
 		{
 			m_resendRange = std::make_pair(begin, end);
 		}
@@ -178,11 +178,11 @@ namespace FIX
 			Locker l(m_mutex); m_logoutReason = value;
 		}
 
-		void queue(int msgSeqNum, const Message& message)
+		void queue(int64_t msgSeqNum, const Message& message)
 		{
 			Locker l(m_mutex); m_queue[msgSeqNum] = message;
 		}
-		bool retrieve(int msgSeqNum, Message& message)
+		bool retrieve(int64_t msgSeqNum, Message& message)
 		{
 			Locker l(m_mutex);
 			Messages::iterator i = m_queue.find(msgSeqNum);
@@ -199,28 +199,27 @@ namespace FIX
 			Locker l(m_mutex); m_queue.clear();
 		}
 
-		bool set(int s, const std::string& m)
+		bool set(int64_t s, const std::string& m)
 		{
 			Locker l(m_mutex); return m_pStore->set(s, m);
 		}
-		void get(int b, int e, std::vector < std::string >& m) const
-			throw (IOException)
+		void get(int64_t b, int64_t e, std::vector < std::string >& m) const
 		{
 			Locker l(m_mutex); m_pStore->get(b, e, m);
 		}
-		int getNextSenderMsgSeqNum() const
+		int64_t getNextSenderMsgSeqNum() const
 		{
 			Locker l(m_mutex); return m_pStore->getNextSenderMsgSeqNum();
 		}
-		int getNextTargetMsgSeqNum() const
+		int64_t getNextTargetMsgSeqNum() const
 		{
 			Locker l(m_mutex); return m_pStore->getNextTargetMsgSeqNum();
 		}
-		void setNextSenderMsgSeqNum(int n)
+		void setNextSenderMsgSeqNum(int64_t n)
 		{
 			Locker l(m_mutex); m_pStore->setNextSenderMsgSeqNum(n);
 		}
-		void setNextTargetMsgSeqNum(int n)
+		void setNextTargetMsgSeqNum(int64_t n)
 		{
 			Locker l(m_mutex); m_pStore->setNextTargetMsgSeqNum(n);
 		}

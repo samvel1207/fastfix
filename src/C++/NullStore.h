@@ -60,22 +60,22 @@ namespace FIX
 	public:
 		NullStore() : m_nextSenderMsgSeqNum(1), m_nextTargetMsgSeqNum(1) {}
 
-		bool set(int, const std::string&);
-		void get(int, int, std::vector < std::string >&) const;
+		bool set(int64_t, const std::string&);
+		void get(int64_t, int64_t, std::vector < std::string >&) const;
 
-		int getNextSenderMsgSeqNum() const
+		int64_t getNextSenderMsgSeqNum() const
 		{
 			return m_nextSenderMsgSeqNum;
 		}
-		int getNextTargetMsgSeqNum() const
+		int64_t getNextTargetMsgSeqNum() const
 		{
 			return m_nextTargetMsgSeqNum;
 		}
-		void setNextSenderMsgSeqNum(int value)
+		void setNextSenderMsgSeqNum(int64_t value)
 		{
 			m_nextSenderMsgSeqNum = value;
 		}
-		void setNextTargetMsgSeqNum(int value)
+		void setNextTargetMsgSeqNum(int64_t value)
 		{
 			m_nextTargetMsgSeqNum = value;
 		}
@@ -105,8 +105,8 @@ namespace FIX
 		void refresh() {}
 
 	private:
-		int m_nextSenderMsgSeqNum;
-		int m_nextTargetMsgSeqNum;
+		int64_t m_nextSenderMsgSeqNum;
+		int64_t m_nextTargetMsgSeqNum;
 		UtcTimeStamp m_creationTime;
 	};
 }

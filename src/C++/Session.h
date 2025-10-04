@@ -333,8 +333,8 @@ namespace FIX
 		void next(const Message&, const UtcTimeStamp& timeStamp, bool queued = false);
 		void disconnect();
 
-		int getExpectedSenderNum() { return m_state.getNextSenderMsgSeqNum(); }
-		int getExpectedTargetNum() { return m_state.getNextTargetMsgSeqNum(); }
+		int64_t getExpectedSenderNum() { return m_state.getNextSenderMsgSeqNum(); }
+		int64_t getExpectedTargetNum() { return m_state.getNextTargetMsgSeqNum(); }
 
 		Log* getLog() { return &m_state; }
 		const MessageStore* getStore() { return &m_state; }
@@ -347,7 +347,7 @@ namespace FIX
 		static void removeSession(Session&);
 
 		bool send(const std::string&);
-		bool sendRaw(Message&, int msgSeqNum = 0);
+		bool sendRaw(Message&, int64_t msgSeqNum = 0);
 		bool resend(Message& message);
 		void persist(const Message&, const std::string&) throw (IOException);
 
@@ -396,7 +396,7 @@ namespace FIX
 		bool doTargetTooLow(const Message& msg);
 		void doTargetTooHigh(const Message& msg);
 		void nextQueued(const UtcTimeStamp& timeStamp);
-		bool nextQueued(int num, const UtcTimeStamp& timeStamp);
+		bool nextQueued(int64_t num, const UtcTimeStamp& timeStamp);
 
 		void nextLogon(const Message&, const UtcTimeStamp& timeStamp);
 		void nextHeartbeat(const Message&, const UtcTimeStamp& timeStamp);
@@ -409,7 +409,7 @@ namespace FIX
 		void generateLogon();
 		void generateLogon(const Message&);
 		void generateResendRequest(const BeginString&, const MsgSeqNum&);
-		void generateSequenceReset(int, int);
+		void generateSequenceReset(int64_t, int64_t);
 		void generateHeartbeat();
 		void generateHeartbeat(const Message&);
 		void generateTestRequest(const std::string&);

@@ -203,11 +203,11 @@ namespace FIX
         FILE* headerFile = file_fopen(m_headerFileName.c_str(), "r+");
         if (headerFile)
         {
-            int num;
+            int64_t num;
             long offset;
             std::size_t size;
 
-            while (FILE_FSCANF(headerFile, "%d,%ld,%zu ", &num, &offset, &size) == 3)
+            while (FILE_FSCANF(headerFile, "%lld,%ld,%zu ", &num, &offset, &size) == 3)
             {
                 std::pair<NumToOffset::iterator, bool> it = m_offsets.insert(
                     NumToOffset::value_type(num, std::make_pair(offset, size)));
@@ -246,7 +246,7 @@ namespace FIX
         delete pStore;
     }
 
-    bool MMapStore::set(int msgSeqNum, const std::string& msg)
+    bool MMapStore::set(int64_t msgSeqNum, const std::string& msg)
     {
         if (fseek(m_msgFile, 0, SEEK_END))
             throw IOException("Cannot seek to end of " + m_msgFileName);
@@ -258,7 +258,7 @@ namespace FIX
             throw IOException("Unable to get file pointer position from " + m_msgFileName);
         std::size_t size = msg.size();
 
-        if (fprintf(m_headerFile, "%d,%ld,%zu ", msgSeqNum, offset, size) < 0)
+        if (fprintf(m_headerFile, "%lld,%ld,%zu ", msgSeqNum, offset, size) < 0)
             throw IOException("Unable to write to file " + m_headerFileName);
 
         std::pair<NumToOffset::iterator, bool> it = m_offsets.insert(
@@ -277,34 +277,34 @@ namespace FIX
         return true;
     }
 
-    void MMapStore::get(int begin, int end, std::vector < std::string >& result) const
+    void MMapStore::get(int64_t begin, int64_t end, std::vector < std::string >& result) const
     {
         result.clear();
         std::string msg;
-        for (int i = begin; i <= end; ++i)
+        for (int64_t i = begin; i <= end; ++i)
         {
             if (get(i, msg))
                 result.push_back(msg);
         }
     }
 
-    int MMapStore::getNextSenderMsgSeqNum() const
+    int64_t MMapStore::getNextSenderMsgSeqNum() const
     {
         return m_cache.getNextSenderMsgSeqNum();
     }
 
-    int MMapStore::getNextTargetMsgSeqNum() const
+    int64_t MMapStore::getNextTargetMsgSeqNum() const
     {
         return m_cache.getNextTargetMsgSeqNum();
     }
 
-    void MMapStore::setNextSenderMsgSeqNum(int value)
+    void MMapStore::setNextSenderMsgSeqNum(int64_t value)
     {
         m_cache.setNextSenderMsgSeqNum(value);
         setSeqNum();
     }
 
-    void MMapStore::setNextTargetMsgSeqNum(int value)
+    void MMapStore::setNextTargetMsgSeqNum(int64_t value)
     {
         m_cache.setNextTargetMsgSeqNum(value);
         setSeqNum();
@@ -365,7 +365,7 @@ namespace FIX
         strcpy(m_mmapData->time, UtcTimeStampConvertor::convert(m_cache.getCreationTime()).c_str());
     }
 
-    bool MMapStore::get(int msgSeqNum, std::string& msg) const
+    bool MMapStore::get(int64_t msgSeqNum, std::string& msg) const
     {
         NumToOffset::const_iterator find = m_offsets.find(msgSeqNum);
         if (find == m_offsets.end()) return false;
