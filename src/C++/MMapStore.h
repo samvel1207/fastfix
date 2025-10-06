@@ -94,7 +94,7 @@ namespace FIX
 		{
 			int64_t senderSeqNum;
 			int64_t targetSeqNum;
-			char time[24]; // must include '\0'
+			char time[32]; // must include '\0'
 		};
 
 	public:

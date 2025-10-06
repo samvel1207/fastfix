@@ -211,7 +211,7 @@ namespace FIX
 			result.resize(totalLength);
 
 			char* buf = (char*)result.c_str();
-			FIX::integer_to_string(buf, tagLength, m_tag);
+			FIX::integer_to_string<int, unsigned int>(buf, tagLength, m_tag);
 
 			buf[tagLength] = '=';
 			memcpy(buf + tagLength + 1, m_string.data(), m_string.length());

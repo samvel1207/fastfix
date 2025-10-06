@@ -36,7 +36,6 @@
 #include <cstdio>
 #include <limits>
 #include <iterator>
-#include <charconv>
 
 namespace FIX
 {
@@ -44,14 +43,14 @@ namespace FIX
 	typedef int signed_int;
 	typedef unsigned int unsigned_int;
 
-#define UNSIGNED_VALUE_OF( x ) ( ( x < 0 ) ? -unsigned_int(x) : unsigned_int(x) )
+#define UNSIGNED_VALUE_OF( x, UT ) ( ( x < 0 ) ? -UT(x) : UT(x) )
 
 #define IS_SPACE( x ) ( x == ' ' )
 #define IS_DIGIT( x ) ( unsigned_int( x - '0' ) < 10 )
 
 	inline int number_of_symbols_in(const signed_int value)
 	{
-		unsigned_int number = UNSIGNED_VALUE_OF(value);
+		unsigned_int number = UNSIGNED_VALUE_OF(value, unsigned_int);
 
 		int symbols = 0;
 
@@ -97,16 +96,48 @@ namespace FIX
 	  "90919293949596979899"
 	};
 
-	inline char* integer_to_string(char* buf, const size_t len, signed_int t)
+	template<typename T>
+	inline bool string_to_integer(const char* str, const char* end, T& result)
+	{
+		bool isNegative = false;
+		T x = 0;
+
+		if (str == end)
+			return false;
+
+		if (*str == '-')
+		{
+			isNegative = true;
+			if (++str == end)
+				return false;
+		}
+
+		do
+		{
+			const int c = *str - '0';
+			if (c > 9)
+				return false;
+			x = 10 * x + c;
+		} while (++str != end);
+
+		if (isNegative)
+			x = -1 * x;
+
+		result = x;
+		return true;
+	}
+
+	template<typename T, typename UT>
+	inline char* integer_to_string(char* buf, const size_t len, T t)
 	{
 		const bool isNegative = t < 0;
 		char* p = buf + len;
 
-		unsigned_int number = UNSIGNED_VALUE_OF(t);
+		UT number = UNSIGNED_VALUE_OF(t, UT);
 
 		while (number > 99)
 		{
-			unsigned_int pos = number % 100;
+			int pos = number % 100;
 			number /= 100;
 
 			*--p = digit_pairs[2 * pos + 1];
@@ -129,11 +160,10 @@ namespace FIX
 		return p;
 	}
 
-	inline char* integer_to_string_padded
-	(char* buf, const size_t len, signed_int t,
-		const char paddingChar = '0')
+	template<typename T, typename UT>
+	inline char* integer_to_string_padded(char* buf, const size_t len, T t, const char paddingChar = '0')
 	{
-		char* p = integer_to_string(buf, len, t);
+		char* p = integer_to_string<T, UT>(buf, len, t);
 		while (p > buf)
 			*--p = paddingChar;
 		return p;
@@ -157,39 +187,14 @@ namespace FIX
 		{
 			// buffer is big enough for significant digits and extra digit,
 			// minus and null
-			char buffer[std::numeric_limits<signed_int>::digits10 + 2];
-			const char* const start
-				= integer_to_string(buffer, sizeof(buffer), value);
+			char buffer[std::numeric_limits<signed_int>::digits10 + 3] = {0};
+			const char* const start = integer_to_string<signed_int, unsigned_int>(buffer, sizeof(buffer), value);
 			return std::string(start, buffer + sizeof(buffer) - start);
 		}
 
 		static bool convert(const char* str, const char* end, signed_int& result)
 		{
-			bool isNegative = false;
-			signed_int x = 0;
-
-			if (str == end)
-				return false;
-
-			if (*str == '-')
-			{
-				isNegative = true;
-				if (++str == end)
-					return false;
-			}
-
-			do
-			{
-				const unsigned_int c = *str - '0';
-				if (c > 9) return false;
-				x = 10 * x + c;
-			} while (++str != end);
-
-			if (isNegative)
-				x = -unsigned_int(x);
-
-			result = x;
-			return true;
+			return string_to_integer<signed_int>(str, end, result);
 		}
 
 		static bool convert(const std::string& value, signed_int& result)
@@ -215,15 +220,24 @@ namespace FIX
 			// buffer is big enough for significant digits and extra digit,
 			// minus and null
 			char buffer[std::numeric_limits<int64_t>::digits10 + 3] = {0};
-			auto [ptr, ec] = std::to_chars(buffer, buffer + sizeof(buffer), value);
-			return std::string(buffer, ptr);
+			const char* const start = integer_to_string<int64_t, uint64_t>(buffer, sizeof(buffer), value);
+			return std::string(start, buffer + sizeof(buffer) - start);
+		}
+
+		static bool convert(const char* str, const char* end, int64_t& result)
+		{
+			return string_to_integer<int64_t>(str, end, result);
+		}
+
+		static bool convert(const std::string& value, int64_t& result)
+		{
+			return convert(value.c_str(), value.c_str() + value.size(), result);
 		}
 
 		static int64_t convert(const std::string& value)
 		{
 			int64_t result = 0;
-			auto [ptr, ec] = std::from_chars(value.data(), value.data() + value.size(), result);
-			if (ec != std::errc())
+			if (!convert(value.c_str(), value.c_str() + value.size(), result))
 				throw FieldConvertError(value);
 			else
 				return result;
@@ -237,7 +251,7 @@ namespace FIX
 		{
 			if (value > 255 || value < 0) throw FieldConvertError();
 			char result[3];
-			if (integer_to_string_padded(result, sizeof(result), value) != result)
+			if (integer_to_string_padded<int, unsigned int>(result, sizeof(result), value) != result)
 			{
 				throw FieldConvertError();
 			}
@@ -457,20 +471,20 @@ namespace FIX
 			value.getYMD(year, month, day);
 			value.getHMS(hour, minute, second, fraction, precision);
 
-			integer_to_string_padded(result, 4, year);
-			integer_to_string_padded(result + 4, 2, month);
-			integer_to_string_padded(result + 6, 2, day);
+			integer_to_string_padded<int, unsigned int>(result, 4, year);
+			integer_to_string_padded<int, unsigned int>(result + 4, 2, month);
+			integer_to_string_padded<int, unsigned int>(result + 6, 2, day);
 			result[8] = '-';
-			integer_to_string_padded(result + 9, 2, hour);
+			integer_to_string_padded<int, unsigned int>(result + 9, 2, hour);
 			result[11] = ':';
-			integer_to_string_padded(result + 12, 2, minute);
+			integer_to_string_padded<int, unsigned int>(result + 12, 2, minute);
 			result[14] = ':';
-			integer_to_string_padded(result + 15, 2, second);
+			integer_to_string_padded<int, unsigned int>(result + 15, 2, second);
 
 			if (precision)
 			{
 				result[17] = '.';
-				if (integer_to_string_padded(result + 18, precision, fraction)
+				if (integer_to_string_padded<int, unsigned int>(result + 18, precision, fraction)
 					!= result + 18)
 				{
 					throw FieldConvertError();
@@ -581,16 +595,16 @@ namespace FIX
 
 			value.getHMS(hour, minute, second, fraction, precision);
 
-			integer_to_string_padded(result, 2, hour);
+			integer_to_string_padded<int, unsigned int>(result, 2, hour);
 			result[2] = ':';
-			integer_to_string_padded(result + 3, 2, minute);
+			integer_to_string_padded<int, unsigned int>(result + 3, 2, minute);
 			result[5] = ':';
-			integer_to_string_padded(result + 6, 2, second);
+			integer_to_string_padded<int, unsigned int>(result + 6, 2, second);
 
 			if (precision)
 			{
 				result[8] = '.';
-				if (integer_to_string_padded(result + 9, precision, fraction) != result + 9)
+				if (integer_to_string_padded<int, unsigned int>(result + 9, precision, fraction) != result + 9)
 					throw FieldConvertError();
 			}
 
@@ -675,9 +689,9 @@ namespace FIX
 
 			char result[8];
 
-			integer_to_string_padded(result, 4, year);
-			integer_to_string_padded(result + 4, 2, month);
-			integer_to_string_padded(result + 6, 2, day);
+			integer_to_string_padded<int, unsigned int>(result, 4, year);
+			integer_to_string_padded<int, unsigned int>(result + 4, 2, month);
+			integer_to_string_padded<int, unsigned int>(result + 6, 2, day);
 
 			return std::string(result, sizeof(result));
 		}
