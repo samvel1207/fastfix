@@ -28,6 +28,7 @@
 #include "Parser.h"
 #include "Utility.h"
 #include <fstream>
+#include <inttypes.h>
 
 namespace FIX
 {
@@ -141,7 +142,7 @@ namespace FIX
 			long offset;
 			std::size_t size;
 
-			while (FILE_FSCANF(headerFile, "%lld,%ld,%zu ", &num, &offset, &size) == 3)
+			while (FILE_FSCANF(headerFile, "%" PRId64 ",%ld,%zu ", &num, &offset, &size) == 3)
 			{
 				std::pair<NumToOffset::iterator, bool> it =
 					m_offsets.insert(NumToOffset::value_type(num, std::make_pair(offset, size)));
@@ -158,7 +159,7 @@ namespace FIX
 		if (seqNumsFile)
 		{
 			int64_t sender, target;
-			if (FILE_FSCANF(seqNumsFile, "%lld : %lld", &sender, &target) == 2)
+			if (FILE_FSCANF(seqNumsFile, "%" PRId64 " : %" PRId64 "", &sender, &target) == 2)
 			{
 				m_cache.setNextSenderMsgSeqNum(sender);
 				m_cache.setNextTargetMsgSeqNum(target);
@@ -210,7 +211,7 @@ namespace FIX
 			throw IOException("Unable to get file pointer position from " + m_msgFileName);
 		std::size_t size = msg.size();
 
-		if (fprintf(m_headerFile, "%lld,%ld,%zu ", msgSeqNum, offset, size) < 0)
+		if (fprintf(m_headerFile, "%" PRId64 ",%ld,%zu ", msgSeqNum, offset, size) < 0)
 			throw IOException("Unable to write to file " + m_headerFileName);
 		std::pair<NumToOffset::iterator, bool> it =
 			m_offsets.insert(NumToOffset::value_type(msgSeqNum, std::make_pair(offset, size)));
@@ -308,7 +309,7 @@ namespace FIX
 	void FileStore::setSeqNum()
 	{
 		rewind(m_seqNumsFile);
-		fprintf(m_seqNumsFile, "%lld : %lld",
+		fprintf(m_seqNumsFile, "%" PRId64 " : %" PRId64 "",
 			getNextSenderMsgSeqNum(), getNextTargetMsgSeqNum());
 		if (ferror(m_seqNumsFile))
 			throw IOException("Unable to write to file " + m_seqNumsFileName);

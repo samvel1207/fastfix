@@ -28,6 +28,7 @@
 #include "Parser.h"
 #include "Utility.h"
 #include <fstream>
+#include <inttypes.h>
 
 namespace FIX
 {
@@ -207,7 +208,7 @@ namespace FIX
             long offset;
             std::size_t size;
 
-            while (FILE_FSCANF(headerFile, "%lld,%ld,%zu ", &num, &offset, &size) == 3)
+            while (FILE_FSCANF(headerFile, "%" PRId64 ",%ld,%zu ", &num, &offset, &size) == 3)
             {
                 std::pair<NumToOffset::iterator, bool> it = m_offsets.insert(
                     NumToOffset::value_type(num, std::make_pair(offset, size)));
@@ -258,7 +259,7 @@ namespace FIX
             throw IOException("Unable to get file pointer position from " + m_msgFileName);
         std::size_t size = msg.size();
 
-        if (fprintf(m_headerFile, "%lld,%ld,%zu ", msgSeqNum, offset, size) < 0)
+        if (fprintf(m_headerFile, "%" PRId64 ",%ld,%zu ", msgSeqNum, offset, size) < 0)
             throw IOException("Unable to write to file " + m_headerFileName);
 
         std::pair<NumToOffset::iterator, bool> it = m_offsets.insert(
