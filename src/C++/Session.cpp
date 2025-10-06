@@ -727,8 +727,9 @@ namespace FIX
 		resendRequest.setField(endSeqNo);
 
 		// OMD_THIRD_PARTY_CHANGE: Set this in order to let our FixSubscriber class know the end of range 
-		MsgSeqNum sideValue(msgSeqNum);
-		resendRequest.setField(sideValue);
+		// (LastMsgSeqNumProcessed will be removed before sending the message to the server)
+		LastMsgSeqNumProcessed lastMsgSeqNumProcessed(msgSeqNum);
+		resendRequest.setField(lastMsgSeqNumProcessed);
 
 		fill(resendRequest.getHeader());
 		sendRaw(resendRequest);
