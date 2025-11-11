@@ -149,8 +149,7 @@ namespace FIX
 		bool withinHeartBeat() const
 		{
 			UtcTimeStamp now;
-			return ((now - lastSentTime()) < heartBtInt()) &&
-				((now - lastReceivedTime()) < heartBtInt());
+			return ((now - lastSentTime()) < heartBtInt()) && ((now - lastReceivedTime()) < heartBtInt());
 		}
 		bool timedOut() const
 		{
@@ -165,22 +164,24 @@ namespace FIX
 		bool needTestRequest() const
 		{
 			UtcTimeStamp now;
-			return (now - lastReceivedTime()) >=
-				((1.2 * ((double)testRequest() + 1)) * (double)heartBtInt());
+			return (now - lastReceivedTime()) >= ((1.2 * ((double)testRequest() + 1)) * (double)heartBtInt());
 		}
 
 		std::string logoutReason() const
 		{
-			Locker l(m_mutex); return m_logoutReason;
+			Locker l(m_mutex);
+			return m_logoutReason;
 		}
 		void logoutReason(const std::string& value)
 		{
-			Locker l(m_mutex); m_logoutReason = value;
+			Locker l(m_mutex);
+			m_logoutReason = value;
 		}
 
 		void queue(int64_t msgSeqNum, const Message& message)
 		{
-			Locker l(m_mutex); m_queue[msgSeqNum] = message;
+			Locker l(m_mutex);
+			m_queue[msgSeqNum] = message;
 		}
 		bool retrieve(int64_t msgSeqNum, Message& message)
 		{
@@ -196,73 +197,100 @@ namespace FIX
 		}
 		void clearQueue()
 		{
-			Locker l(m_mutex); m_queue.clear();
+			Locker l(m_mutex);
+			m_queue.clear();
 		}
 
 		bool set(int64_t s, const std::string& m)
 		{
-			Locker l(m_mutex); return m_pStore->set(s, m);
+			Locker l(m_mutex);
+			return m_pStore->set(s, m);
 		}
 		void get(int64_t b, int64_t e, std::vector < std::string >& m) const
 		{
-			Locker l(m_mutex); m_pStore->get(b, e, m);
+			Locker l(m_mutex);
+			m_pStore->get(b, e, m);
 		}
 		int64_t getNextSenderMsgSeqNum() const
 		{
-			Locker l(m_mutex); return m_pStore->getNextSenderMsgSeqNum();
+			Locker l(m_mutex);
+			return m_pStore->getNextSenderMsgSeqNum();
 		}
 		int64_t getNextTargetMsgSeqNum() const
 		{
-			Locker l(m_mutex); return m_pStore->getNextTargetMsgSeqNum();
+			Locker l(m_mutex);
+			return m_pStore->getNextTargetMsgSeqNum();
 		}
 		void setNextSenderMsgSeqNum(int64_t n)
 		{
-			Locker l(m_mutex); m_pStore->setNextSenderMsgSeqNum(n);
+			Locker l(m_mutex);
+			m_pStore->setNextSenderMsgSeqNum(n);
 		}
 		void setNextTargetMsgSeqNum(int64_t n)
 		{
-			Locker l(m_mutex); m_pStore->setNextTargetMsgSeqNum(n);
+			Locker l(m_mutex);
+			m_pStore->setNextTargetMsgSeqNum(n);
 		}
 		void incrNextSenderMsgSeqNum()
 		{
-			Locker l(m_mutex); m_pStore->incrNextSenderMsgSeqNum();
+			Locker l(m_mutex);
+			m_pStore->incrNextSenderMsgSeqNum();
 		}
 		void incrNextTargetMsgSeqNum()
 		{
-			Locker l(m_mutex); m_pStore->incrNextTargetMsgSeqNum();
+			Locker l(m_mutex);
+			m_pStore->incrNextTargetMsgSeqNum();
 		}
 		UtcTimeStamp getCreationTime() const
 		{
-			Locker l(m_mutex); return m_pStore->getCreationTime();
+			Locker l(m_mutex);
+			return m_pStore->getCreationTime();
 		}
 		void reset()
 		{
-			Locker l(m_mutex); m_pStore->reset();
+			Locker l(m_mutex);
+			m_pStore->reset();
 		}
 		void refresh()
 		{
-			Locker l(m_mutex); m_pStore->refresh();
+			Locker l(m_mutex);
+			m_pStore->refresh();
 		}
 
 		void clear()
 		{
-			if (!m_pLog) return; Locker l(m_mutex); m_pLog->clear();
+			if (!m_pLog)
+				return;
+			Locker l(m_mutex);
+			m_pLog->clear();
 		}
 		void backup()
 		{
-			if (!m_pLog) return; Locker l(m_mutex); m_pLog->backup();
+			if (!m_pLog)
+				return;
+			Locker l(m_mutex);
+			m_pLog->backup();
 		}
 		void onIncoming(const std::string& string)
 		{
-			if (!m_pLog) return; Locker l(m_mutex); m_pLog->onIncoming(string);
+			if (!m_pLog)
+				return;
+			Locker l(m_mutex);
+			m_pLog->onIncoming(string);
 		}
 		void onOutgoing(const std::string& string)
 		{
-			if (!m_pLog) return; Locker l(m_mutex); m_pLog->onOutgoing(string);
+			if (!m_pLog)
+				return;
+			Locker l(m_mutex);
+			m_pLog->onOutgoing(string);
 		}
 		void onEvent(const std::string& string)
 		{
-			if (!m_pLog) return; Locker l(m_mutex); m_pLog->onEvent(string);
+			if (!m_pLog)
+				return;
+			Locker l(m_mutex);
+			m_pLog->onEvent(string);
 		}
 
 	private:

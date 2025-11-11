@@ -51,6 +51,7 @@ namespace FIX
 	const char END_TIME[] = "EndTime";
 	const char START_DAY[] = "StartDay";
 	const char END_DAY[] = "EndDay";
+	const char NON_STOP_SESSION[] = "NonStopSession";
 	const char LOGON_TIME[] = "LogonTime";
 	const char LOGOUT_TIME[] = "LogoutTime";
 	const char LOGON_DAY[] = "LogonDay";
@@ -79,6 +80,7 @@ namespace FIX
 	const char PRESERVE_MESSAGE_FIELDS_ORDER[] = "PreserveMessageFieldsOrder";
 	const char LOGON_TIMEOUT[] = "LogonTimeout";
 	const char LOGOUT_TIMEOUT[] = "LogoutTimeout";
+	const char LOG_MESSAGES[] = "LogMessages";
 	const char FILE_STORE_PATH[] = "FileStorePath";
 	const char MYSQL_STORE_USECONNECTIONPOOL[] = "MySQLStoreUseConnectionPool";
 	const char MYSQL_STORE_DATABASE[] = "MySQLStoreDatabase";

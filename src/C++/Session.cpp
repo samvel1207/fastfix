@@ -66,7 +66,9 @@ namespace FIX
 		m_pLogFactory(pLogFactory),
 		m_pResponder(0),
 		m_noDataFields(false),
-		m_validateDictionary(true)
+		m_validateDictionary(true),
+		m_nonStopSession(false),
+		m_logMessages(true)
 	{
 		m_state.heartBtInt(heartBtInt);
 		m_state.initiate(heartBtInt != 0);
@@ -599,8 +601,10 @@ namespace FIX
 
 	bool Session::send(const std::string& string)
 	{
-		if (!m_pResponder) return false;
-		m_state.onOutgoing(string);
+		if (!m_pResponder)
+			return false;
+		if (m_logMessages)
+			m_state.onOutgoing(string);
 		return m_pResponder->send(string);
 	}
 
@@ -1265,7 +1269,8 @@ namespace FIX
 	{
 		try
 		{
-			m_state.onIncoming(msg);
+			if (m_logMessages)
+				m_state.onIncoming(msg);
 			const DataDictionary& sessionDD =
 				m_dataDictionaryProvider.getSessionDataDictionary(m_sessionID.getBeginString());
 			if (m_sessionID.isFIXT())

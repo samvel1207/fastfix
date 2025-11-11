@@ -318,6 +318,23 @@ namespace FIX
 			m_validateDictionary = value;
 		}
 
+		bool getNonStopSession()
+		{
+			return m_nonStopSession;
+		}
+		void setNonStopSession(bool value)
+		{
+			m_nonStopSession = value;
+		}
+
+		bool getLogMessages()
+		{
+			return m_logMessages;
+		}
+		void setLogMessages(bool value)
+		{
+			m_logMessages = value;
+		}
 
 		void setResponder(Responder* pR)
 		{
@@ -364,6 +381,9 @@ namespace FIX
 		}
 		bool checkSessionTime(const UtcTimeStamp& timeStamp)
 		{
+			if (m_nonStopSession)
+				return true;
+
 			UtcTimeStamp creationTime = m_state.getCreationTime();
 			return m_sessionTime.isInSameRange(timeStamp, creationTime);
 		}
@@ -448,6 +468,8 @@ namespace FIX
 		bool m_validateLengthAndChecksum;
 		bool m_noDataFields;
 		bool m_validateDictionary;
+		bool m_nonStopSession;
+		bool m_logMessages;
 
 		SessionState m_state;
 		DataDictionaryProvider m_dataDictionaryProvider;

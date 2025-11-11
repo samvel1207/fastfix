@@ -200,6 +200,10 @@ namespace FIX
 			pSession->setNoDataFields(settings.getBool(NO_DATA_FIELDS));
 		if (settings.has(VALIDATE_DICTIONARY))
 			pSession->setValidateDictionary(settings.getBool(VALIDATE_DICTIONARY));
+		if (settings.has(NON_STOP_SESSION))
+			pSession->setNonStopSession(settings.getBool(NON_STOP_SESSION));
+		if (settings.has(LOG_MESSAGES))
+			pSession->setLogMessages(settings.getBool(LOG_MESSAGES));
 
 		return pSession.release();
 	}
