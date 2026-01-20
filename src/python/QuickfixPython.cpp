@@ -248670,7 +248670,7 @@ SWIGINTERN PyObject *_wrap_new_Session(PyObject *SWIGUNUSEDPARM(self), PyObject 
   arg7 = reinterpret_cast< LogFactory * >(argp7);
   {
     SWIG_PYTHON_THREAD_BEGIN_ALLOW;
-    result = (FIX::Session *)new FIX::Session(*arg1,*arg2,(FIX::SessionID const &)*arg3,(DataDictionaryProvider const &)*arg4,(TimeRange const &)*arg5,arg6,arg7);
+    result = (FIX::Session *)new FIX::Session(*arg1,*arg2,(FIX::SessionID const &)*arg3,(DataDictionaryProvider const &)*arg4,(TimeRange const &)*arg5,arg6,arg7,false);
     SWIG_PYTHON_THREAD_END_ALLOW;
   }
   resultobj = SWIG_NewPointerObj(SWIG_as_voidptr(result), SWIGTYPE_p_FIX__Session, SWIG_POINTER_NEW |  0 );

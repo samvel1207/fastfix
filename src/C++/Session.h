@@ -49,7 +49,7 @@ namespace FIX
 			const SessionID&,
 			const DataDictionaryProvider&,
 			const TimeRange&,
-			int heartBtInt, LogFactory* pLogFactory);
+			int heartBtInt, LogFactory* pLogFactory, bool nonStopSession);
 		virtual ~Session();
 
 		void logon()

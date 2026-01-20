@@ -38,12 +38,9 @@ namespace FIX
 #define LOGEX( method ) try { method; } catch( std::exception& e ) \
   { m_state.onEvent( e.what() ); }
 
-	Session::Session(Application& application,
-		MessageStoreFactory& messageStoreFactory,
-		const SessionID& sessionID,
-		const DataDictionaryProvider& dataDictionaryProvider,
-		const TimeRange& sessionTime,
-		int heartBtInt, LogFactory* pLogFactory)
+	Session::Session(Application& application, MessageStoreFactory& messageStoreFactory, const SessionID& sessionID,
+		const DataDictionaryProvider& dataDictionaryProvider, const TimeRange& sessionTime, int heartBtInt,
+		LogFactory* pLogFactory, bool nonStopSession)
 		: m_application(application),
 		m_sessionID(sessionID),
 		m_sessionTime(sessionTime),
@@ -67,7 +64,7 @@ namespace FIX
 		m_pResponder(0),
 		m_noDataFields(false),
 		m_validateDictionary(true),
-		m_nonStopSession(false),
+		m_nonStopSession(nonStopSession),
 		m_logMessages(true)
 	{
 		m_state.heartBtInt(heartBtInt);
@@ -720,7 +717,7 @@ namespace FIX
 		SmartPtr<Message> pMsg(newMessage("2"));
 		Message& resendRequest = *pMsg;
 
-		BeginSeqNo beginSeqNo((int)getExpectedTargetNum());
+		BeginSeqNo beginSeqNo(getExpectedTargetNum());
 		EndSeqNo endSeqNo(msgSeqNum - 1);
 		if (beginString >= FIX::BeginString_FIX42)
 			endSeqNo = 0;

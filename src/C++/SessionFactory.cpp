@@ -120,10 +120,14 @@ namespace FIX
 			if (heartBtInt <= 0) throw ConfigError("Heartbeat must be greater than zero");
 		}
 
+		bool nonStopSession = false;
+		if (settings.has(NON_STOP_SESSION))
+			nonStopSession = settings.getBool(NON_STOP_SESSION);
+
 		SmartPtr<Session> pSession;
 		pSession.reset(new Session(m_application, m_messageStoreFactory,
 			sessionID, dataDictionaryProvider, sessionTimeRange,
-			heartBtInt, m_pLogFactory));
+			heartBtInt, m_pLogFactory, nonStopSession));
 
 		pSession->setSenderDefaultApplVerID(defaultApplVerID);
 

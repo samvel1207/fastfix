@@ -207897,7 +207897,7 @@ _wrap_new_Session(int argc, VALUE *argv, VALUE self) {
     SWIG_exception_fail(SWIG_ArgError(res7), Ruby_Format_TypeError( "", "LogFactory *","Session", 7, argv[6] )); 
   }
   arg7 = reinterpret_cast< LogFactory * >(argp7);
-  result = (FIX::Session *)new FIX::Session(*arg1,*arg2,(FIX::SessionID const &)*arg3,(DataDictionaryProvider const &)*arg4,(TimeRange const &)*arg5,arg6,arg7);
+  result = (FIX::Session *)new FIX::Session(*arg1,*arg2,(FIX::SessionID const &)*arg3,(DataDictionaryProvider const &)*arg4,(TimeRange const &)*arg5,arg6,arg7,false);
   DATA_PTR(self) = result;
   return self;
 fail:

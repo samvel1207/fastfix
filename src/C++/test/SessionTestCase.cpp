@@ -354,7 +354,7 @@ struct sessionFixture : public TestCallback
     DataDictionaryProvider provider;
     provider.addTransportDataDictionary( sessionID.getBeginString(), "../spec/FIX42.xml" );
     object = new Session( *this, factory, sessionID, provider,
-                           sessionTime, heartBtInt, 0 );
+                           sessionTime, heartBtInt, 0, false );
     object->setResponder( this );
   }
 
@@ -395,7 +395,7 @@ struct sessionT11Fixture : public TestCallback
     provider.addApplicationDataDictionary( ApplVerID(ApplVerID_FIX50), "../spec/FIX50.xml" );
     provider.addApplicationDataDictionary( ApplVerID(ApplVerID_FIX42), "../spec/FIX42.xml" );
     object = new Session( *this, factory, sessionID, provider,
-                           sessionTime, heartBtInt, 0 );
+                           sessionTime, heartBtInt, 0, false);
     object->setSenderDefaultApplVerID( FIX::Message::toApplVerID(BeginString("FIX.5.0")) );
     object->setResponder( this );
   }
@@ -1356,7 +1356,7 @@ struct initiatorCreatedBeforeStartTimeFixture : public TestCallback
     
     DataDictionaryProvider provider;
     provider.addTransportDataDictionary( sessionID.getBeginString(), "../spec/FIX42.xml" );
-    object = new Session( *this, memStoreFactory, sessionID, provider, sessionTime, HEARTBTINT, 0 );
+    object = new Session( *this, memStoreFactory, sessionID, provider, sessionTime, HEARTBTINT, 0, false);
   }
 
   virtual ~initiatorCreatedBeforeStartTimeFixture()
